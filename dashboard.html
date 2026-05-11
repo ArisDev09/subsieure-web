@@ -7,6 +7,7 @@
     <link rel="icon" type="image/png" href="https://d2eioyamun8mp1.cloudfront.net/images/1778429322279_xe9Oxxk0FV.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
             --primary: #00f5ff;
@@ -25,7 +26,7 @@
         
         .navbar { position: fixed; top: 0; width: 100%; padding: 16px 0; background: rgba(10,10,10,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-light); z-index: 1000; }
         .nav-container { max-width: 1280px; margin: 0 auto; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; }
-        .nav-logo { display: flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 800; }
+        .nav-logo { display: flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 800; text-decoration: none; }
         .nav-logo img { height: 32px; width: auto; }
         .nav-logo span { background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .btn-logout { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 14px; margin-left: 20px; }
@@ -41,6 +42,7 @@
         .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; margin-bottom: 60px; }
         .tool-card { background: #121218; border-radius: 24px; overflow: hidden; border: 1px solid var(--border-light); transition: all 0.3s; }
         .tool-card:hover { transform: translateY(-5px); border-color: rgba(0,245,255,0.3); }
+        .tool-image { width: 100%; height: 180px; object-fit: cover; }
         .tool-info { padding: 24px; }
         .tool-name { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
         .tool-price { font-size: 24px; font-weight: 800; color: #00f5ff; margin: 16px 0; }
@@ -88,36 +90,98 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
-<script src="js/firebase-config.js"></script>
 <script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDyLM8PdOKwpzXu-SHV3YAzU28gL2QE4KY",
+        authDomain: "subsieure-toolshop.firebaseapp.com",
+        projectId: "subsieure-toolshop",
+        storageBucket: "subsieure-toolshop.firebasestorage.app",
+        messagingSenderId: "277182125256",
+        appId: "1:277182125256:web:b0a98cb19d06d046ce81fd"
+    };
+    
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
     function formatPrice(p){ 
         if (p === 0 || p === null || p === undefined) return 'Free';
         return p.toLocaleString('vi-VN'); 
     }
     
+    function escapeHtml(s){ if(!s) return ''; return s.replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+    
     auth.onAuthStateChanged(async (user) => {
         if (!user) { window.location.href = 'login.html'; return; }
-        const userDoc = await db.collection('users').doc(user.uid).get();
-        document.getElementById('userBalance').innerText = (userDoc.data()?.balance || 0).toLocaleString('vi-VN') + 'đ';
-        await loadPurchased(user.uid);
-        await loadTransactions(user.uid);
+        try {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            document.getElementById('userBalance').innerText = (userDoc.data()?.balance || 0).toLocaleString('vi-VN') + 'đ';
+            await loadPurchased(user.uid);
+            await loadTransactions(user.uid);
+        } catch (error) {
+            console.error("Lỗi:", error);
+            document.getElementById('purchasedTools').innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Lỗi tải dữ liệu</p></div>';
+        }
     });
+    
     async function loadPurchased(uid) {
-        const s = await db.collection('transactions').where('userId','==',uid).where('type','==','purchase').get();
-        const tools = []; s.forEach(d=>tools.push(d.data()));
-        const container = document.getElementById('purchasedTools');
-        if(tools.length===0){ container.innerHTML='<div class="empty-state"><i class="fas fa-shopping-cart"></i><p>Bạn chưa mua tool nào</p></div>'; return; }
-        container.innerHTML = tools.map(t=>`<div class="tool-card"><div class="tool-info"><h3 class="tool-name">${escapeHtml(t.toolName)}</h3><div class="tool-price">${t.amount === 0 ? 'Free' : formatPrice(t.amount) + 'đ'}</div><a href="${t.downloadLink||'#'}" target="_blank" class="btn-download"><i class="fas fa-download"></i> Tải xuống</a></div></div>`).join('');
+        try {
+            const snapshot = await db.collection('transactions').where('userId', '==', uid).where('type', '==', 'purchase').get();
+            const purchases = [];
+            snapshot.forEach(doc => purchases.push(doc.data()));
+            
+            const container = document.getElementById('purchasedTools');
+            if(purchases.length === 0) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-shopping-cart"></i><p>Bạn chưa mua tool nào</p></div>';
+                return;
+            }
+            
+            container.innerHTML = purchases.map(t => `
+                <div class="tool-card">
+                    <div class="tool-info">
+                        <h3 class="tool-name">${escapeHtml(t.toolName)}</h3>
+                        <div class="tool-price">${t.amount === 0 ? 'Free' : formatPrice(t.amount) + 'đ'}</div>
+                        <a href="${t.downloadLink || '#'}" target="_blank" class="btn-download"><i class="fas fa-download"></i> Tải xuống</a>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error("Lỗi loadPurchased:", error);
+            document.getElementById('purchasedTools').innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Lỗi tải danh sách tool đã mua</p></div>';
+        }
     }
+    
     async function loadTransactions(uid) {
-        const s = await db.collection('transactions').where('userId','==',uid).orderBy('createdAt','desc').get();
-        const tbody = document.getElementById('transactionsList');
-        if(s.empty){ tbody.innerHTML='<tr><td colspan="5" style="text-align:center;">Chưa có giao dịch</td></tr>'; return; }
-        tbody.innerHTML='';
-        s.forEach(d=>{ const t=d.data(); tbody.innerHTML+=`<tr><td>${escapeHtml(t.toolName||'Nạp tiền')}</td><td style="color:${t.type==='purchase'?'#ef4444':'#10b981'}">${t.type==='purchase'?'-':'+'}${formatPrice(t.amount)}${t.amount !== 0 ? 'đ' : ''}</td><td>${t.type==='purchase'?'Mua tool':'Nạp tiền'}</td><td>${t.downloadLink?`<a href="${t.downloadLink}" target="_blank" style="color:#00f5ff;">Link tải</a>`:'--'}</td><td>${t.createdAt?.toDate().toLocaleString('vi-VN')||'N/A'}</td>`; });
+        try {
+            const snapshot = await db.collection('transactions').where('userId', '==', uid).orderBy('createdAt', 'desc').get();
+            const tbody = document.getElementById('transactionsList');
+            if(snapshot.empty) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Chưa có giao dịch</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+            snapshot.forEach(doc => {
+                const t = doc.data();
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${escapeHtml(t.toolName || 'Nạp tiền')}</td>
+                        <td style="color:${t.type === 'purchase' ? '#ef4444' : '#10b981'}">${t.type === 'purchase' ? '-' : '+'}${formatPrice(t.amount)}${t.amount !== 0 ? 'đ' : ''}</td>
+                        <td>${t.type === 'purchase' ? 'Mua tool' : 'Nạp tiền'}</td>
+                        <td>${t.downloadLink ? `<a href="${t.downloadLink}" target="_blank" style="color:#00f5ff;">Link tải</a>` : '--'}</td>
+                        <td>${t.createdAt?.toDate().toLocaleString('vi-VN') || 'N/A'}</td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            console.error("Lỗi loadTransactions:", error);
+            document.getElementById('transactionsList').innerHTML = '<tr><td colspan="5" style="text-align:center;">Lỗi tải lịch sử giao dịch</td></tr>';
+        }
     }
-    document.getElementById('logoutDashboard').onclick = async()=>{ await auth.signOut(); window.location.href='index.html'; };
-    function escapeHtml(s){ if(!s) return ''; return s.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+    
+    document.getElementById('logoutDashboard').onclick = async() => { await auth.signOut(); window.location.href = 'index.html'; };
 </script>
 </body>
 </html>

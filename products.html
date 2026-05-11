@@ -7,6 +7,7 @@
     <link rel="icon" type="image/png" href="https://d2eioyamun8mp1.cloudfront.net/images/1778429322279_xe9Oxxk0FV.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -34,7 +35,6 @@
 
         .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
 
-        /* Navbar */
         .navbar {
             position: fixed;
             top: 0;
@@ -80,11 +80,9 @@
         }
         .back-link:hover { color: #00f5ff; background: rgba(0,245,255,0.1); transform: translateX(-5px); }
 
-        /* Product Detail */
         .product-detail { padding: 120px 0 60px; }
         .product-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; margin-bottom: 60px; }
 
-        /* SLIDER 16:9 */
         .product-gallery {
             background: #121218;
             border-radius: 28px;
@@ -166,7 +164,6 @@
             border-radius: 4px;
         }
 
-        /* Product Info */
         .product-info { animation: fadeInUp 0.6s ease 0.1s both; }
         .product-header h1 { font-size: 36px; font-weight: 800; margin-bottom: 16px; }
         .admin-note {
@@ -196,6 +193,7 @@
             transition: all 0.3s;
         }
         .lang-badge:hover { background: rgba(0,245,255,0.3); transform: translateY(-2px); }
+        .product-price { font-size: 32px; font-weight: 800; color: #00f5ff; margin: 20px 0; }
         .btn-buy {
             display: block;
             width: 100%;
@@ -221,7 +219,6 @@
         }
         .warning-box p { color: #ff6b6b; font-size: 13px; margin: 4px 0; }
 
-        /* Sections */
         .video-section, .setup-section, .long-description {
             margin-top: 40px;
             background: rgba(18,18,24,0.6);
@@ -324,11 +321,28 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
-<script src="js/firebase-config.js"></script>
 <script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDyLM8PdOKwpzXu-SHV3YAzU28gL2QE4KY",
+        authDomain: "subsieure-toolshop.firebaseapp.com",
+        projectId: "subsieure-toolshop",
+        storageBucket: "subsieure-toolshop.firebasestorage.app",
+        messagingSenderId: "277182125256",
+        appId: "1:277182125256:web:b0a98cb19d06d046ce81fd"
+    };
+    
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
     let currentTool = null;
     let currentImageIndex = 0;
     let allImages = [];
+    let currentUser = null;
+    let userBalance = 0;
 
     function getToolId() {
         const params = new URLSearchParams(window.location.search);
@@ -363,14 +377,18 @@
             dotsContainer.appendChild(dot);
         }
 
-        prevBtn.onclick = () => {
-            currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
-            showImage(currentImageIndex);
-        };
-        nextBtn.onclick = () => {
-            currentImageIndex = (currentImageIndex + 1) % images.length;
-            showImage(currentImageIndex);
-        };
+        if (prevBtn) {
+            prevBtn.onclick = () => {
+                currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+                showImage(currentImageIndex);
+            };
+        }
+        if (nextBtn) {
+            nextBtn.onclick = () => {
+                currentImageIndex = (currentImageIndex + 1) % images.length;
+                showImage(currentImageIndex);
+            };
+        }
     }
 
     function showImage(index) {
@@ -380,6 +398,20 @@
         dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
         currentImageIndex = index;
     }
+
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            currentUser = user;
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                userBalance = userDoc.data()?.balance || 0;
+            } catch(e) { console.error("Lỗi lấy user:", e); }
+        } else {
+            currentUser = null;
+            userBalance = 0;
+        }
+        loadProduct();
+    });
 
     async function loadProduct() {
         const toolId = getToolId();
@@ -458,8 +490,7 @@
         const langNames = { python: 'Python', rust: 'Rust', cpp: 'C++', html: 'HTML', js: 'JavaScript', php: 'PHP', java: 'Java', go: 'Go' };
         const langIcons = { python: 'fab fa-python', rust: 'fas fa-cog', cpp: 'fas fa-code', html: 'fab fa-html5', js: 'fab fa-js', php: 'fab fa-php', java: 'fab fa-java', go: 'fab fa-golang' };
 
-        // Hiển thị giá - Nếu giá = 0 thì hiển thị "Free"
-        const priceDisplay = tool.price === 0 ? 'Free' : tool.price.toLocaleString('vi-VN') + '<span>đ</span>';
+        const priceDisplay = tool.price === 0 ? 'Free' : tool.price.toLocaleString('vi-VN') + 'đ';
         const buyButtonText = tool.price === 0 ? 'Tải ngay - Free' : `Mua ngay - ${tool.price.toLocaleString('vi-VN')}đ`;
 
         let sliderHTML = '';
@@ -515,27 +546,178 @@
         if (allImages.length > 1) initSlider();
     }
 
-    window.buyNow = () => {
+    window.buyNow = async () => {
         if (!currentTool) return;
+        
         if (currentTool.price === 0) {
-            // Nếu free, mở link tải trực tiếp
-            if (currentTool.downloadLink && currentTool.downloadLink !== '#') {
-                window.open(currentTool.downloadLink, '_blank');
-            } else {
-                alert('Tool này miễn phí! Liên hệ Admin để nhận link tải.');
-            }
-        } else {
-            const msg = `Tôi muốn mua tool: ${currentTool.name} giá ${currentTool.price.toLocaleString('vi-VN')}đ`;
-            window.open(`https://zalo.me/0986947309?text=${encodeURIComponent(msg)}`, '_blank');
+            Swal.fire({
+                title: 'Xác nhận tải tool miễn phí',
+                text: `Bạn có chắc chắn muốn tải tool "${currentTool.name}" miễn phí?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Có, tải ngay',
+                cancelButtonText: 'Hủy',
+                background: '#121218',
+                color: '#fff',
+                confirmButtonColor: '#00f5ff',
+                cancelButtonColor: '#ef4444'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    if (currentTool.downloadLink && currentTool.downloadLink !== '#') {
+                        window.open(currentTool.downloadLink, '_blank');
+                        Swal.fire({
+                            title: 'Thành công!',
+                            text: 'Tool đang được tải xuống.',
+                            icon: 'success',
+                            background: '#121218',
+                            color: '#fff',
+                            confirmButtonColor: '#00f5ff',
+                            timer: 1500
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Liên hệ Admin',
+                            text: 'Tool này miễn phí! Vui lòng liên hệ Admin qua Zalo để nhận link tải.',
+                            icon: 'info',
+                            background: '#121218',
+                            color: '#fff',
+                            confirmButtonColor: '#00f5ff'
+                        });
+                    }
+                }
+            });
+            return;
         }
+        
+        if (!currentUser) {
+            Swal.fire({
+                title: 'Chưa đăng nhập',
+                text: 'Bạn cần đăng nhập để mua tool!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Đăng nhập ngay',
+                cancelButtonText: 'Hủy',
+                background: '#121218',
+                color: '#fff',
+                confirmButtonColor: '#00f5ff',
+                cancelButtonColor: '#ef4444'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'login.html';
+                }
+            });
+            return;
+        }
+        
+        if (userBalance < currentTool.price) {
+            Swal.fire({
+                title: 'Số dư không đủ!',
+                text: `Bạn cần ${currentTool.price.toLocaleString('vi-VN')}đ nhưng chỉ có ${userBalance.toLocaleString('vi-VN')}đ.\nVui lòng nạp thêm tiền.`,
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonText: 'Nạp tiền ngay',
+                cancelButtonText: 'Hủy',
+                background: '#121218',
+                color: '#fff',
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#ef4444'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('showRechargeModal')?.click();
+                }
+            });
+            return;
+        }
+        
+        Swal.fire({
+            title: 'Xác nhận mua tool',
+            html: `Bạn có chắc chắn muốn mua <strong>${currentTool.name}</strong> với giá <strong style="color:#00f5ff">${currentTool.price.toLocaleString('vi-VN')}đ</strong>?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Có, mua ngay',
+            cancelButtonText: 'Hủy',
+            background: '#121218',
+            color: '#fff',
+            confirmButtonColor: '#00f5ff',
+            cancelButtonColor: '#ef4444'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Đang xử lý...',
+                    text: 'Vui lòng chờ trong giây lát',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); },
+                    background: '#121218'
+                });
+                
+                try {
+                    const link = currentTool.downloadLink || '#';
+                    
+                    await db.runTransaction(async (transaction) => {
+                        const userRef = db.collection('users').doc(currentUser.uid);
+                        const userDoc = await transaction.get(userRef);
+                        const currentBalance = userDoc.data().balance || 0;
+                        if (currentBalance < currentTool.price) throw new Error("Số dư không đủ");
+                        transaction.update(userRef, { balance: currentBalance - currentTool.price });
+                        transaction.set(db.collection('transactions').doc(), {
+                            userId: currentUser.uid,
+                            userEmail: currentUser.email,
+                            toolId: currentTool.id,
+                            toolName: currentTool.name,
+                            amount: currentTool.price,
+                            type: 'purchase',
+                            status: 'success',
+                            downloadLink: link,
+                            createdAt: new Date()
+                        });
+                    });
+                    
+                    userBalance -= currentTool.price;
+                    
+                    Swal.fire({
+                        title: 'Mua thành công!',
+                        text: `Bạn đã mua tool "${currentTool.name}" thành công.`,
+                        icon: 'success',
+                        confirmButtonText: 'Tải xuống ngay',
+                        background: '#121218',
+                        color: '#fff',
+                        confirmButtonColor: '#00f5ff'
+                    }).then(() => {
+                        if (link !== '#') window.open(link, '_blank');
+                    });
+                    
+                } catch (e) {
+                    if (e.message === "Số dư không đủ") {
+                        const userDoc = await db.collection('users').doc(currentUser.uid).get();
+                        userBalance = userDoc.data().balance || 0;
+                        Swal.fire({
+                            title: 'Số dư không đủ!',
+                            text: `Giao dịch thất bại. Số dư hiện tại: ${userBalance.toLocaleString('vi-VN')}đ`,
+                            icon: 'error',
+                            confirmButtonText: 'Nạp tiền',
+                            background: '#121218',
+                            color: '#fff',
+                            confirmButtonColor: '#10b981'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Lỗi',
+                            text: e.message,
+                            icon: 'error',
+                            background: '#121218',
+                            color: '#fff',
+                            confirmButtonColor: '#00f5ff'
+                        });
+                    }
+                }
+            }
+        });
     };
 
     function escapeHtml(str) {
         if (!str) return '';
         return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
     }
-
-    loadProduct();
 </script>
 </body>
 </html>
