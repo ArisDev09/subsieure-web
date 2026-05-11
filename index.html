@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subsieure - Trang Chủ</title>
+    
+    <link rel="icon" type="image/png" href="https://d2eioyamun8mp1.cloudfront.net/images/1778429322279_xe9Oxxk0FV.png">
+    <link rel="shortcut icon" type="image/png" href="https://d2eioyamun8mp1.cloudfront.net/images/1778429322279_xe9Oxxk0FV.png">
+    
+    <meta name="description" content="Subsieure - Cửa hàng tool auto, tool SEO, tool marketing chất lượng cao.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: #00f5ff;
+            --primary-dark: #00b8c9;
+            --bg-dark: #000000;
+            --bg-section: #0a0a0a;
+            --bg-card-solid: #121218;
+            --border-light: rgba(255, 255, 255, 0.06);
+            --text-main: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.4);
+            --gradient-1: linear-gradient(135deg, #00f5ff 0%, #00d4ff 50%, #0099cc 100%);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: white; overflow-x: hidden; }
+        
+        /* Custom cursor */
+        .cursor-glow {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0,245,255,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: all 0.1s ease;
+        }
+        
+        * { cursor: url('https://play.vsthemes.org/t-cursors/14438/8d5360f7ad20a4ef01852cb9ac24c765.webp'), auto; }
+        a, button, .btn, .tool-card, .user-avatar, .filter-btn, .sort-btn, .page-btn, .nav-links a, .zalo-bubble { 
+            cursor: url('https://play.vsthemes.org/t-cursors/14438/8d5360f7ad20a4ef01852cb9ac24c765.webp'), pointer; 
+        }
+        
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+        
+        /* Bong bóng Zalo - rung rung */
+        .zalo-bubble {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(135deg, #0066cc, #004499);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 102, 204, 0.4);
+            transition: all 0.3s ease;
+            animation: shake 1.5s ease-in-out infinite;
+            text-decoration: none;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        .zalo-bubble:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(0, 102, 204, 0.6);
+            animation: none;
+        }
+        .zalo-bubble img {
+            width: 38px;
+            height: auto;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-5px) rotate(-3deg); }
+            50% { transform: translateY(5px) rotate(3deg); }
+            75% { transform: translateY(-3px) rotate(-2deg); }
+        }
+        .zalo-bubble::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            background: rgba(0, 102, 204, 0.4);
+            border-radius: 50%;
+            z-index: -1;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.15); }
+        }
+        
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #00f5ff, #ff6b6b, #ffd93d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite;
+        }
+        @keyframes gradientShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+        
+        /* Hiệu ứng fadeInUp */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Navbar */
+        .navbar { position: fixed; top: 0; width: 100%; padding: 16px 0; background: rgba(10,10,10,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 1000; transition: all 0.3s ease; }
+        .navbar.scrolled { padding: 12px 0; background: rgba(10,10,10,0.98); }
+        .nav-container { max-width: 1280px; margin: 0 auto; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; }
+        .nav-logo { display: flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 800; cursor: pointer; }
+        .nav-logo img { height: 32px; width: auto; }
+        .nav-logo span { background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav-links { display: flex; gap: 32px; }
+        .nav-links a { color: var(--text-secondary); text-decoration: none; font-weight: 500; transition: color 0.3s; position: relative; }
+        .nav-links a::after { content: ''; position: absolute; bottom: -6px; left: 0; width: 0; height: 2px; background: var(--gradient-1); transition: width 0.3s; }
+        .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+        .nav-links a:hover, .nav-links a.active { color: #00f5ff; }
+        
+        .balance-wrapper { display: flex; align-items: center; gap: 12px; }
+        .balance-badge { background: rgba(0,245,255,0.1); padding: 8px 16px; border-radius: 40px; font-size: 14px; transition: all 0.3s; }
+        .balance-badge:hover { background: rgba(0,245,255,0.2); transform: scale(1.02); }
+        .balance-badge i { color: #00f5ff; margin-right: 8px; }
+        .btn-recharge { background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 8px 16px; border-radius: 40px; color: white; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
+        .btn-recharge:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(16,185,129,0.4); }
+        .user-menu { position: relative; }
+        .user-avatar { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px 16px; background: rgba(255,255,255,0.05); border-radius: 40px; transition: all 0.3s; }
+        .user-avatar:hover { background: rgba(255,255,255,0.1); }
+        .user-dropdown { position: absolute; top: 100%; right: 0; margin-top: 8px; background: #121218; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; width: 180px; overflow: hidden; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.3s; z-index: 100; }
+        .user-menu:hover .user-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
+        .user-dropdown a { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: var(--text-secondary); text-decoration: none; transition: all 0.3s; }
+        .user-dropdown a:hover { background: rgba(0,245,255,0.1); color: #00f5ff; }
+        .btn-outline { padding: 8px 24px; background: transparent; border: 1.5px solid rgba(255,255,255,0.2); border-radius: 30px; color: white; text-decoration: none; font-weight: 500; transition: all 0.3s; }
+        .btn-outline:hover { border-color: #00f5ff; background: rgba(0,245,255,0.05); transform: translateY(-2px); }
+        
+        /* Hero */
+        .hero { min-height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden; }
+        .hero-bg { position: absolute; inset: 0; z-index: 0; }
+        .hero-bg-blur { position: absolute; width: 60%; height: 60%; background: radial-gradient(ellipse at 30% 50%, rgba(0,245,255,0.15), transparent); filter: blur(60px); top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .hero-bg-orb { position: absolute; width: 300px; height: 300px; background: radial-gradient(circle, rgba(0,245,255,0.2), transparent); border-radius: 50%; filter: blur(40px); animation: float 20s infinite; }
+        .hero-bg-orb:nth-child(1) { top: 20%; left: 10%; }
+        .hero-bg-orb:nth-child(2) { bottom: 20%; right: 10%; width: 200px; height: 200px; animation-delay: -5s; }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-30px); } }
+        .hero-content { position: relative; z-index: 1; text-align: center; max-width: 800px; margin: 0 auto; padding-top: 80px; }
+        .hero-title { font-size: 56px; font-weight: 800; margin-bottom: 24px; line-height: 1.2; animation: fadeInUp 0.8s ease; }
+        .hero-desc { font-size: 18px; color: var(--text-secondary); margin-bottom: 40px; animation: fadeInUp 0.8s ease 0.1s both; }
+        .hero-stats { display: flex; justify-content: center; gap: 64px; margin-bottom: 48px; animation: fadeInUp 0.8s ease 0.2s both; }
+        .hero-stat { text-align: center; transition: transform 0.3s; }
+        .hero-stat:hover { transform: translateY(-5px); }
+        .hero-stat-number { font-size: 36px; font-weight: 700; color: #00f5ff; }
+        .hero-stat-label { font-size: 14px; color: var(--text-muted); }
+        .hero-buttons { display: flex; gap: 20px; justify-content: center; animation: fadeInUp 0.8s ease 0.3s both; }
+        .btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 32px; border-radius: 40px; font-weight: 600; text-decoration: none; transition: all 0.3s; }
+        .btn-primary { background: var(--gradient-1); color: #000; }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,245,255,0.4); }
+        .btn-outline-custom { background: transparent; border: 2px solid #00f5ff; color: #00f5ff; }
+        .btn-outline-custom:hover { background: rgba(0,245,255,0.1); transform: translateY(-3px); }
+        
+        /* Section */
+        .section { padding: 80px 0; background: #0a0a0a; }
+        .section-header { text-align: center; margin-bottom: 60px; }
+        .section-badge { display: inline-block; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 2px; color: #00f5ff; margin-bottom: 16px; }
+        .section-title { font-size: 44px; font-weight: 700; margin-bottom: 20px; }
+        .section-desc { font-size: 18px; color: var(--text-secondary); max-width: 600px; margin: 0 auto; }
+        
+        /* Tools Grid */
+        .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 30px; }
+        .tool-card { background: var(--bg-card-solid); border: 1px solid var(--border-light); border-radius: 28px; overflow: hidden; transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1); animation: fadeInUp 0.5s ease forwards; opacity: 0; }
+        .tool-card:nth-child(1) { animation-delay: 0.05s; }
+        .tool-card:nth-child(2) { animation-delay: 0.1s; }
+        .tool-card:nth-child(3) { animation-delay: 0.15s; }
+        .tool-card:nth-child(4) { animation-delay: 0.2s; }
+        .tool-card:nth-child(5) { animation-delay: 0.25s; }
+        .tool-card:nth-child(6) { animation-delay: 0.3s; }
+        .tool-card:hover { transform: translateY(-8px); border-color: rgba(0,245,255,0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .tool-image-wrapper { position: relative; overflow: hidden; height: 220px; }
+        .tool-image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s; }
+        .tool-card:hover .tool-image { transform: scale(1.05); }
+        .tool-category { position: absolute; top: 16px; left: 16px; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 30px; font-size: 12px; color: #00f5ff; }
+        .tool-info { padding: 24px; }
+        .tool-name { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+        .tool-desc { color: var(--text-secondary); font-size: 14px; margin-bottom: 16px; line-height: 1.5; }
+        .tool-price { font-size: 28px; font-weight: 800; color: #00f5ff; margin-bottom: 20px; }
+        .tool-price span { font-size: 14px; color: var(--text-muted); }
+        .btn-buy { flex: 1; padding: 12px; border-radius: 40px; font-weight: 600; font-size: 14px; cursor: pointer; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--gradient-1); color: #000; border: none; transition: all 0.3s; }
+        .btn-buy:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,245,255,0.3); }
+        
+        /* Loading & Empty State - CĂN GIỮA */
+        .loading-wrapper { text-align: center; padding: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; grid-column: 1 / -1; }
+        .loading-spinner { width: 50px; height: 50px; border: 3px solid rgba(0,245,255,0.2); border-top-color: #00f5ff; border-radius: 50%; margin: 0 auto 16px; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .empty-state { text-align: center; padding: 80px; background: rgba(255,255,255,0.02); border-radius: 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; grid-column: 1 / -1; }
+        .empty-state i { font-size: 64px; color: var(--text-muted); margin-bottom: 20px; }
+        .empty-state h3 { font-size: 24px; margin-bottom: 12px; }
+        .empty-state p { color: var(--text-muted); }
+        
+        /* Chatbot Feature Card */
+        .chatbot-card {
+            background: var(--bg-card-solid);
+            border: 1px solid var(--border-light);
+            border-radius: 28px;
+            padding: 32px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+        }
+        .chatbot-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0,245,255,0.2);
+            background: rgba(18,18,24,0.95);
+        }
+        .chatbot-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, rgba(0,245,255,0.1), rgba(0,212,255,0.05));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+        }
+        .chatbot-icon i {
+            font-size: 28px;
+            color: #00f5ff;
+        }
+        .chatbot-card h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: white;
+        }
+        .chatbot-card p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        /* Contact Section */
+        .contact-section { background: linear-gradient(180deg, #0a0a0a 0%, rgba(0,20,30,0.3) 100%); padding: 80px 0; }
+        .contact-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+        .contact-info .section-badge { text-align: left; display: inline-block; }
+        .contact-info .section-title { text-align: left; }
+        .contact-info .section-desc { text-align: left; margin: 0 0 32px 0; }
+        .contact-buttons { display: flex; flex-direction: column; gap: 16px; margin-bottom: 0; }
+        .contact-btn { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; background: var(--bg-card-solid); border: 1px solid var(--border-light); border-radius: 20px; text-decoration: none; transition: all 0.3s; }
+        .contact-btn:hover { transform: translateX(5px); border-color: rgba(0,245,255,0.3); }
+        .contact-btn-left { display: flex; align-items: center; gap: 12px; }
+        .contact-btn-left i { font-size: 28px; }
+        .contact-btn-left span { font-weight: 600; color: white; }
+        .contact-btn-right { color: var(--text-muted); font-size: 14px; }
+        .contact-btn.zalo .contact-btn-left img { height: 24px; width: auto; }
+        .contact-btn.facebook .contact-btn-left i { color: #1877f2; }
+        .contact-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .contact-stat { text-align: center; padding: 24px; background: var(--bg-card-solid); border-radius: 20px; border: 1px solid var(--border-light); transition: all 0.3s; }
+        .contact-stat:hover { transform: translateY(-5px); border-color: rgba(0,245,255,0.3); }
+        .contact-stat i { font-size: 32px; color: #00f5ff; margin-bottom: 12px; display: block; }
+        .contact-stat h4 { font-size: 28px; font-weight: 700; }
+        .contact-stat p { font-size: 13px; color: var(--text-muted); }
+        
+        /* Modal Liên hệ */
+        .contact-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            z-index: 4000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        .contact-modal.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .contact-modal-card {
+            background: linear-gradient(135deg, #121218, #0a0a0f);
+            border-radius: 48px;
+            padding: 48px;
+            max-width: 480px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            border: 1px solid rgba(0,245,255,0.3);
+            animation: scaleIn 0.3s ease;
+            box-shadow: 0 0 60px rgba(0,245,255,0.15);
+        }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .contact-modal-card .modal-icon { width: 80px; height: 80px; background: linear-gradient(135deg, rgba(0,245,255,0.2), rgba(16,185,129,0.2)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; border: 1px solid rgba(0,245,255,0.3); }
+        .contact-modal-card .modal-icon i { font-size: 40px; color: #00f5ff; }
+        .contact-modal-card h2 { font-family: 'Space Grotesk', monospace; font-size: 28px; font-weight: 700; background: linear-gradient(135deg, #00f5ff, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px; }
+        .contact-modal-card p { color: #a0a0b0; font-size: 16px; line-height: 1.6; margin-bottom: 32px; }
+        .modal-social { display: flex; justify-content: center; gap: 24px; margin-bottom: 32px; }
+        .modal-social a { width: 64px; height: 64px; background: rgba(255,255,255,0.03); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s; border: 1px solid rgba(255,255,255,0.1); text-decoration: none; }
+        .modal-social a:hover { transform: translateY(-5px); }
+        .modal-social a.zalo:hover { background: #0066cc; border-color: #0066cc; }
+        .modal-social a.facebook:hover { background: #1877f2; border-color: #1877f2; }
+        .modal-social a img { height: 32px; width: auto; }
+        .modal-social a i { font-size: 28px; }
+        .modal-social a.zalo i { color: #0066cc; }
+        .modal-social a.facebook i { color: #1877f2; }
+        .modal-social a.zalo:hover i, .modal-social a.facebook:hover i { color: white; }
+        .close-modal { position: absolute; top: 20px; right: 24px; background: none; border: none; color: #888; font-size: 28px; cursor: pointer; transition: color 0.3s; }
+        .close-modal:hover { color: #ef4444; }
+        
+        /* Footer */
+        .footer { border-top: 1px solid var(--border-light); padding: 40px 0; margin-top: 0; text-align: center; }
+        .footer-copyright { color: var(--text-muted); font-size: 14px; }
+        
+        /* Recharge Modal */
+        .recharge-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(20px); z-index: 3000; align-items: center; justify-content: center; }
+        .recharge-modal.active { display: flex; }
+        .recharge-card { background: linear-gradient(135deg, #0f0f1a, #0a0a0f); border: 1px solid rgba(0,245,255,0.3); border-radius: 48px; padding: 48px; max-width: 480px; width: 90%; text-align: center; position: relative; }
+        .close-recharge { position: absolute; top: 20px; right: 24px; background: none; border: none; color: #888; font-size: 28px; cursor: pointer; }
+        
+        @media (max-width: 1024px) {  }
+        @media (max-width: 768px) {
+            .hero-title { font-size: 36px; }
+            .nav-links { display: none; }
+            .hero-stats { gap: 30px; }
+            .section-title { font-size: 32px; }
+            .contact-wrapper { grid-template-columns: 1fr; }
+            .tools-grid { grid-template-columns: 1fr; }
+            .hero-buttons { flex-direction: column; align-items: center; }
+            .hero-buttons .btn { width: 100%; justify-content: center; }
+            .empty-state { padding: 40px 20px; }
+            .loading-wrapper { padding: 40px 20px; }
+            .zalo-bubble { width: 50px; height: 50px; bottom: 20px; right: 20px; }
+            .zalo-bubble img { width: 28px; }
+        }
+        @media (max-width: 480px) {
+            .hero-title { font-size: 28px; }
+            .hero-stat-number { font-size: 24px; }
+            .recharge-card { padding: 32px 24px; }
+            .contact-modal-card { padding: 32px 24px; }
+        }
+    </style>
+</head>
+<body>
+<script src="js/loading.js"></script>
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<a href="https://zalo.me/0986947309" target="_blank" class="zalo-bubble" id="zaloBubble">
+    <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/01/Logo-Zalo-Arc.png" alt="Zalo">
+</a>
+
+<nav class="navbar" id="navbar">
+    <div class="nav-container">
+        <div class="nav-logo">
+            <img src="https://d2eioyamun8mp1.cloudfront.net/images/1778429322279_xe9Oxxk0FV.png" alt="Subsieure">
+            <span>Subsieure</span>
+        </div>
+        <div class="nav-links">
+            <a href="#home" class="active">Trang chủ</a>
+            <a href="sanpham.html">Sản phẩm</a>
+            <a href="chatbot.html">Chatbot</a>
+            <a href="#" id="contactNavBtn">Liên hệ</a>
+            <a href="admin-panel.html" id="adminLink" style="display: none;">Quản trị</a>
+        </div>
+        <div class="nav-actions">
+            <div id="userInfo" style="display: none;">
+                <div class="balance-wrapper">
+                    <div class="balance-badge"><i class="fas fa-coins"></i><span id="userBalance">0</span>đ</div>
+                    <button class="btn-recharge" id="showRechargeModal"><i class="fas fa-plus-circle"></i> Nạp tiền</button>
+                </div>
+                <div class="user-menu">
+                    <div class="user-avatar"><i class="fas fa-user-circle"></i><span id="userEmailShort"></span><i class="fas fa-chevron-down"></i></div>
+                    <div class="user-dropdown"><a href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a><a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></div>
+                </div>
+            </div>
+            <a href="login.html" class="btn-outline" id="loginBtn">Đăng nhập</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Modal Nạp tiền -->
+<div id="rechargeModal" class="recharge-modal">
+    <div class="recharge-card">
+        <button class="close-recharge" id="closeRechargeModal">&times;</button>
+        <div style="width:80px;height:80px;background:linear-gradient(135deg,rgba(0,245,255,0.2),rgba(16,185,129,0.2));border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;border:1px solid rgba(0,245,255,0.3);"><i class="fas fa-coins" style="font-size:40px;color:#00f5ff;"></i></div>
+        <h2 style="font-family:'Space Grotesk';font-size:28px;font-weight:700;background:linear-gradient(135deg,#00f5ff,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">⚡ NẠP TIỀN VÍ ⚡</h2>
+        <p style="color:#a0a0b0;margin:24px 0;">Vui lòng liên hệ với Admin để được tư vấn chi tiết về cách nạp tiền và nhận ưu đãi hấp dẫn!</p>
+        <div style="display:flex;justify-content:center;gap:24px;margin-bottom:32px;">
+            <a href="https://zalo.me/0986947309" target="_blank" style="width:64px;height:64px;background:rgba(255,255,255,0.03);border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.1);"><img src="https://cdn.haitrieu.com/wp-content/uploads/2022/01/Logo-Zalo-Arc.png" alt="Zalo" style="height:32px;width:auto;"></a>
+            <a href="#" target="_blank" id="fbRechargeLink" style="width:64px;height:64px;background:rgba(255,255,255,0.03);border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.1);"><i class="fab fa-facebook-f" style="font-size:28px;color:#1877f2;"></i></a>
+        </div>
+        <div style="font-size:13px;color:#666;border-top:1px solid rgba(255,255,255,0.05);padding-top:24px;"><i class="fas fa-headset"></i> Hỗ trợ 24/7 - Phản hồi nhanh chóng</div>
+    </div>
+</div>
+
+<!-- Modal Liên hệ -->
+<div id="contactModal" class="contact-modal">
+    <div class="contact-modal-card">
+        <button class="close-modal" id="closeContactModal">&times;</button>
+        <div class="modal-icon"><i class="fas fa-headset"></i></div>
+        <h2>📞 LIÊN HỆ HỖ TRỢ</h2>
+        <p>Vui lòng liên hệ với chúng tôi qua các kênh dưới đây để được tư vấn và hỗ trợ nhanh nhất!</p>
+        <div class="modal-social">
+            <a href="https://zalo.me/0986947309" target="_blank" class="zalo"><img src="https://cdn.haitrieu.com/wp-content/uploads/2022/01/Logo-Zalo-Arc.png" alt="Zalo"></a>
+            <a href="#" target="_blank" class="facebook" id="fbModalLink"><i class="fab fa-facebook-f"></i></a>
+        </div>
+        <div style="font-size:13px;color:#666;border-top:1px solid rgba(255,255,255,0.05);padding-top:24px;"><i class="fas fa-clock"></i> Hỗ trợ 24/7 - Phản hồi trong 5 phút</div>
+    </div>
+</div>
+
+<main>
+    <section class="hero" id="home">
+        <div class="hero-bg"><div class="hero-bg-blur"></div><div class="hero-bg-orb"></div><div class="hero-bg-orb"></div></div>
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Tool Chất Lượng<br><span class="gradient-text">Giá Tốt Nhất</span></h1>
+                <p class="hero-desc">Cung cấp các tool auto, tool SEO, tool marketing chất lượng cao.<br>Hỗ trợ 24/7, giao tool ngay sau khi thanh toán.</p>
+                <div class="hero-stats">
+                    <div class="hero-stat"><div class="hero-stat-number">1000+</div><div class="hero-stat-label">Khách hàng</div></div>
+                    <div class="hero-stat"><div class="hero-stat-number">50+</div><div class="hero-stat-label">Tool độc quyền</div></div>
+                    <div class="hero-stat"><div class="hero-stat-number">24/7</div><div class="hero-stat-label">Hỗ trợ</div></div>
+                </div>
+                <div class="hero-buttons"><a href="sanpham.html" class="btn btn-primary">Khám phá ngay</a><a href="https://zalo.me/0986947309" target="_blank" class="btn btn-outline-custom">Liên hệ Zalo</a></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="tools">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Sản phẩm nổi bật</span>
+                <h2 class="section-title">Danh sách <span class="gradient-text">Tool</span></h2>
+                <p class="section-desc">Những công cụ mạnh mẽ giúp công việc của bạn hiệu quả hơn 200%</p>
+            </div>
+            <div class="tools-grid" id="toolsGrid">
+                <div class="loading-wrapper">
+                    <div class="loading-spinner"></div>
+                    <p>Đang tải sản phẩm...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="chatbot">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Trợ lý ảo thông minh</span>
+                <h2 class="section-title">Chatbot <span class="gradient-text">AI</span></h2>
+                <p class="section-desc">Trò chuyện với trợ lý AI thông minh, được hỗ trợ bởi Groq</p>
+            </div>
+            <div style="max-width: 400px; margin: 0 auto;">
+                <a href="chatbot.html" class="chatbot-card">
+                    <div class="chatbot-icon"><i class="fas fa-robot"></i></div>
+                    <h3>💬 Chat với AI</h3>
+                    <p>Đặt câu hỏi, nhận giải đáp nhanh chóng từ trợ lý ảo thông minh</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="contact-section" id="contact">
+        <div class="container">
+            <div class="contact-wrapper">
+                <div class="contact-info">
+                    <span class="section-badge">Liên hệ mua tool</span>
+                    <h2 class="section-title">Bạn quan tâm<br>đến sản phẩm nào?</h2>
+                    <p class="section-desc">Liên hệ ngay với chúng tôi qua Zalo hoặc Facebook để được tư vấn chi tiết và nhận giá tốt nhất.</p>
+                    <div class="contact-buttons">
+                        <a href="https://zalo.me/0986947309" target="_blank" class="contact-btn zalo"><div class="contact-btn-left"><img src="https://cdn.haitrieu.com/wp-content/uploads/2022/01/Logo-Zalo-Arc.png" alt="Zalo" style="height:24px;"><span>Zalo</span></div><div class="contact-btn-right">Liên hệ ngay →</div></a>
+                        <a href="#" target="_blank" class="contact-btn facebook" id="fbContactBtn"><div class="contact-btn-left"><i class="fab fa-facebook-f"></i><span>Facebook</span></div><div class="contact-btn-right">Theo dõi →</div></a>
+                    </div>
+                </div>
+                <div class="contact-stats">
+                    <div class="contact-stat"><i class="fas fa-clock"></i><h4>24/7</h4><p>Hỗ trợ</p></div>
+                    <div class="contact-stat"><i class="fas fa-smile"></i><h4>100%</h4><p>Hài lòng</p></div>
+                    <div class="contact-stat"><i class="fas fa-rocket"></i><h4>5 phút</h4><p>Giao tool</p></div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-copyright"><p>&copy; 2026 Subsieure - Nguyễn Vinh Cypher</p></div>
+    </div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script>
+    let currentUser = null, allTools = [], userBalance = 0;
+    
+    // Cursor glow
+    const cursorGlow = document.getElementById('cursorGlow');
+    document.addEventListener('mousemove', (e) => {
+        cursorGlow.style.left = e.clientX + 'px';
+        cursorGlow.style.top = e.clientY + 'px';
+    });
+    
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+        const navbar = document.getElementById('navbar');
+        if (window.scrollY > 50) navbar.classList.add('scrolled');
+        else navbar.classList.remove('scrolled');
+    });
+    
+    // Modal Liên hệ
+    const contactModal = document.getElementById('contactModal');
+    function openContactModal() { contactModal.classList.add('active'); document.body.style.overflow = 'hidden'; }
+    function closeContactModal() { contactModal.classList.remove('active'); document.body.style.overflow = ''; }
+    document.getElementById('contactNavBtn')?.addEventListener('click', (e) => { e.preventDefault(); openContactModal(); });
+    document.getElementById('closeContactModal')?.addEventListener('click', closeContactModal);
+    window.addEventListener('click', (e) => { if (e.target === contactModal) closeContactModal(); });
+    
+    // Recharge Modal
+    const rechargeModal = document.getElementById('rechargeModal');
+    function openRechargeModal() { rechargeModal.classList.add('active'); document.body.style.overflow = 'hidden'; }
+    function closeRechargeModalFunc() { rechargeModal.classList.remove('active'); document.body.style.overflow = ''; }
+    document.getElementById('showRechargeModal')?.addEventListener('click', openRechargeModal);
+    document.getElementById('closeRechargeModal')?.addEventListener('click', closeRechargeModalFunc);
+    window.addEventListener('click', (e) => { if (e.target === rechargeModal) closeRechargeModalFunc(); });
+    
+    // Auth state
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            currentUser = user;
+            document.getElementById('loginBtn').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'flex';
+            document.getElementById('userEmailShort').innerText = user.email.split('@')[0];
+            if (user.email === 'nguyenvinhhoang209@gmail.com') document.getElementById('adminLink').style.display = 'inline-block';
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (userDoc.exists) { userBalance = userDoc.data().balance || 0; document.getElementById('userBalance').innerText = userBalance.toLocaleString('vi-VN'); }
+        } else { currentUser = null; document.getElementById('loginBtn').style.display = 'flex'; document.getElementById('userInfo').style.display = 'none'; }
+        loadTools();
+    });
+    
+    function formatPrice(p){ 
+        if (p === 0 || p === null || p === undefined) return 'Free';
+        return p.toLocaleString('vi-VN'); 
+    }
+    
+    async function loadTools() {
+        try {
+            const snapshot = await db.collection('tools').limit(6).get();
+            allTools = [];
+            snapshot.forEach(doc => allTools.push({ id: doc.id, ...doc.data() }));
+            const grid = document.getElementById('toolsGrid');
+            if (allTools.length === 0) { grid.innerHTML = '<div class="empty-state"><i class="fas fa-tools"></i><h3>Chưa có tool nào</h3><p>Admin hãy thêm tool mới nhé!</p></div>'; return; }
+            grid.innerHTML = allTools.map((tool, idx) => `<div class="tool-card" style="animation-delay: ${idx * 0.05}s"><div class="tool-image-wrapper"><img src="${tool.image || 'https://placehold.co/600x400/1a1a1a/00f5ff?text=Tool'}" class="tool-image" onerror="this.src='https://placehold.co/600x400/1a1a1a/00f5ff?text=Tool'"><span class="tool-category">${tool.category || 'Premium'}</span></div><div class="tool-info"><h3 class="tool-name">${escapeHtml(tool.name)}</h3><p class="tool-desc">${escapeHtml((tool.description || 'Tool chất lượng cao từ Subsieure').substring(0,80))}...</p><div class="tool-price">${tool.price === 0 ? 'Free' : formatPrice(tool.price) + '<span>đ</span>'}</div><div style="display: flex; gap: 12px;"><a href="products.html?id=${tool.id}" class="btn-buy" style="text-decoration: none;"><i class="fas fa-eye"></i> Chi tiết</a><button class="btn-buy" onclick="buyTool('${tool.id}', '${escapeHtml(tool.name)}', ${tool.price})"><i class="fas fa-shopping-cart"></i> Mua</button></div></div></div>`).join('');
+        } catch (error) { grid.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Lỗi tải dữ liệu</h3><p>Vui lòng thử lại sau</p></div>'; }
+    }
+    
+    window.buyTool = async (id, name, price) => {
+        if (!currentUser) { if (confirm('Đăng nhập để mua tool?')) window.location.href = 'login.html'; return; }
+        if (price > 0 && userBalance < price) { alert(`Số dư không đủ! Liên hệ Admin nạp tiền.\nSố dư: ${formatPrice(userBalance)}đ`); openRechargeModal(); return; }
+        if (price === 0) {
+            const toolDoc = await db.collection('tools').doc(id).get();
+            const link = toolDoc.data().downloadLink || '#';
+            alert(`Tải tool miễn phí thành công!\nLink: ${link}`);
+            if (link !== '#') window.open(link, '_blank');
+            return;
+        }
+        if (confirm(`Mua "${name}" giá ${formatPrice(price)}đ?`)) {
+            try {
+                const toolDoc = await db.collection('tools').doc(id).get();
+                const link = toolDoc.data().downloadLink || '#';
+                await db.runTransaction(async (t) => {
+                    const userRef = db.collection('users').doc(currentUser.uid);
+                    const userDoc = await t.get(userRef);
+                    t.update(userRef, { balance: (userDoc.data().balance || 0) - price });
+                    t.set(db.collection('transactions').doc(), { userId: currentUser.uid, userEmail: currentUser.email, toolId: id, toolName: name, amount: price, type: 'purchase', status: 'success', downloadLink: link, createdAt: new Date() });
+                });
+                userBalance -= price;
+                document.getElementById('userBalance').innerText = userBalance.toLocaleString('vi-VN');
+                alert(`Mua thành công!\nLink: ${link}`);
+                if (link !== '#') window.open(link, '_blank');
+            } catch (e) { alert('Lỗi: ' + e.message); }
+        }
+    };
+    
+    document.getElementById('logoutBtn')?.addEventListener('click', async () => { await auth.signOut(); window.location.reload(); });
+    function escapeHtml(s) { if (!s) return ''; return s.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+    
+    const fbUrl = "https://www.facebook.com/subsieure.page";
+    document.getElementById('fbContactBtn')?.setAttribute('href', fbUrl);
+    document.getElementById('fbRechargeLink')?.setAttribute('href', fbUrl);
+    document.getElementById('fbModalLink')?.setAttribute('href', fbUrl);
+</script>
+</body>
+</html>

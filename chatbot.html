@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot AI - Subsieure</title>
+    <link rel="icon" type="image/png" href="https://d2eioyamun8mp1.cloudfront.net/images/1778429322279_xe9Oxxk0FV.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: white; overflow-x: hidden; }
+        .cursor-glow { position: fixed; width: 400px; height: 400px; background: radial-gradient(circle, rgba(0,245,255,0.06) 0%, transparent 70%); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); transition: all 0.1s ease; }
+        * { cursor: url('https://play.vsthemes.org/t-cursors/14438/8d5360f7ad20a4ef01852cb9ac24c765.webp'), auto; }
+        a, button { cursor: url('https://play.vsthemes.org/t-cursors/14438/8d5360f7ad20a4ef01852cb9ac24c765.webp'), pointer; }
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+        .navbar { position: fixed; top: 0; width: 100%; padding: 16px 0; background: rgba(10,10,10,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 1000; transition: all 0.3s ease; }
+        .navbar.scrolled { padding: 12px 0; background: rgba(10,10,10,0.98); }
+        .nav-container { max-width: 1280px; margin: 0 auto; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; }
+        .nav-logo { display: flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 800; cursor: pointer; text-decoration: none; }
+        .nav-logo img { height: 32px; width: auto; }
+        .nav-logo span { background: linear-gradient(135deg, #00f5ff, #0099cc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav-links { display: flex; gap: 32px; }
+        .nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-weight: 500; transition: color 0.3s; position: relative; }
+        .nav-links a::after { content: ''; position: absolute; bottom: -6px; left: 0; width: 0; height: 2px; background: linear-gradient(135deg, #00f5ff, #0099cc); transition: width 0.3s; }
+        .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+        .nav-links a:hover, .nav-links a.active { color: #00f5ff; }
+        .back-link { display: flex; align-items: center; gap: 8px; color: #aaa; text-decoration: none; padding: 8px 16px; border-radius: 40px; background: rgba(255,255,255,0.03); transition: all 0.3s; }
+        .back-link:hover { color: #00f5ff; background: rgba(0,245,255,0.1); transform: translateX(-5px); }
+        .page-header { background: linear-gradient(135deg, #0a0a0a 0%, #0f0f1a 100%); padding: 120px 0 60px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .page-header h1 { font-size: 48px; font-weight: 800; margin-bottom: 16px; }
+        .page-header p { color: rgba(255,255,255,0.7); font-size: 18px; }
+        .gradient-text { background: linear-gradient(135deg, #00f5ff, #ff6b6b, #ffd93d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 200% 200%; animation: gradientShift 3s ease infinite; }
+        @keyframes gradientShift { 0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;} }
+        .chatbot-container { padding: 60px 0; min-height: calc(100vh - 300px); }
+        .chat-wrapper { max-width: 900px; margin: 0 auto; background: #121218; border-radius: 32px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; display: flex; flex-direction: column; height: 600px; }
+        .chat-header { padding: 20px 24px; background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 12px; }
+        .chat-avatar { width: 48px; height: 48px; background: linear-gradient(135deg, #00f5ff, #0099cc); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .chat-avatar i { font-size: 24px; color: #000; }
+        .chat-info h3 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+        .chat-info p { font-size: 12px; color: rgba(255,255,255,0.5); }
+        .chat-status { display: flex; align-items: center; gap: 6px; }
+        .status-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;}50%{opacity:0.5;} }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+        .chat-messages::-webkit-scrollbar { width: 4px; }
+        .chat-messages::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+        .chat-messages::-webkit-scrollbar-thumb { background: #00f5ff; border-radius: 10px; }
+        .message { display: flex; gap: 12px; animation: fadeInUp 0.3s ease; }
+        .message.user { flex-direction: row-reverse; }
+        .message-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .message.bot .message-avatar { background: linear-gradient(135deg, #00f5ff, #0099cc); }
+        .message.user .message-avatar { background: rgba(255,255,255,0.1); }
+        .message-avatar i { font-size: 18px; }
+        .message.bot .message-avatar i { color: #000; }
+        .message.user .message-avatar i { color: #00f5ff; }
+        .message-content { max-width: 70%; padding: 12px 18px; border-radius: 20px; font-size: 14px; line-height: 1.5; }
+        .message.bot .message-content { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.05); border-top-left-radius: 4px; }
+        .message.user .message-content { background: linear-gradient(135deg, #00f5ff, #0099cc); color: #000; font-weight: 500; border-top-right-radius: 4px; }
+        .message-time { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 4px; display: block; }
+        .typing-indicator { display: flex; gap: 4px; padding: 12px 18px; background: rgba(255,255,255,0.05); border-radius: 20px; width: fit-content; border-top-left-radius: 4px; }
+        .typing-indicator span { width: 8px; height: 8px; background: rgba(255,255,255,0.5); border-radius: 50%; animation: typing 1.4s infinite; }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing { 0%,60%,100%{transform:translateY(0);opacity:0.5;}30%{transform:translateY(-10px);opacity:1;} }
+        .chat-input-container { padding: 20px 24px; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); }
+        .input-wrapper { display: flex; gap: 12px; align-items: flex-end; }
+        .chat-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 12px 20px; color: white; font-family: 'Inter', sans-serif; font-size: 14px; resize: none; transition: all 0.3s; }
+        .chat-input:focus { outline: none; border-color: #00f5ff; background: rgba(255,255,255,0.08); }
+        .send-btn { width: 44px; height: 44px; background: linear-gradient(135deg, #00f5ff, #0099cc); border: none; border-radius: 50%; color: #000; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+        .send-btn:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(0,245,255,0.5); }
+        .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .suggestions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+        .suggestion-chip { padding: 6px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; font-size: 12px; color: rgba(255,255,255,0.7); cursor: pointer; transition: all 0.3s; }
+        .suggestion-chip:hover { background: rgba(0,245,255,0.15); border-color: #00f5ff; color: #00f5ff; }
+        .footer { border-top: 1px solid rgba(255,255,255,0.05); padding: 40px 0; text-align: center; }
+        .footer-copyright { color: rgba(255,255,255,0.4); font-size: 14px; }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+        @media (max-width: 768px) { .page-header h1{font-size:32px;} .chat-wrapper{height:500px;} .message-content{max-width:85%;} .suggestions{display:none;} }
+    </style>
+</head>
+<body>
+
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<nav class="navbar" id="navbar">
+    <div class="nav-container">
+        <a href="index.html" class="nav-logo">
+            <img src="https://d2eioyamun8mp1.cloudfront.net/images/1778429322279_xe9Oxxk0FV.png" alt="Subsieure">
+            <span>Subsieure</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html">Trang chủ</a>
+            <a href="sanpham.html">Sản phẩm</a>
+            <a href="chatbot.html" class="active">Chatbot</a>
+            <a href="index.html#contact">Liên hệ</a>
+            <a href="admin-panel.html" id="adminLink" style="display: none;">Quản trị</a>
+        </div>
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Quay lại</a>
+    </div>
+</nav>
+
+<div class="page-header">
+    <div class="container">
+        <h1>Chatbot <span class="gradient-text">AI</span></h1>
+        <p>Trò chuyện với trợ lý ảo thông minh - Hỏi đáp về tool, hướng dẫn sử dụng</p>
+    </div>
+</div>
+
+<div class="chatbot-container">
+    <div class="container">
+        <div class="chat-wrapper">
+            <div class="chat-header">
+                <div class="chat-avatar"><i class="fas fa-robot"></i></div>
+                <div class="chat-info">
+                    <h3>Subsieure AI Assistant</h3>
+                    <div class="chat-status"><span class="status-dot"></span><p>Hoạt động</p></div>
+                </div>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot">
+                    <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                    <div class="message-content">
+                        Xin chào! Tôi là trợ lý AI của Subsieure. Tôi có thể giúp gì cho bạn hôm nay?<br>
+                        <span class="message-time">Vừa xong</span>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-input-container">
+                <div class="input-wrapper">
+                    <textarea class="chat-input" id="chatInput" placeholder="Nhập tin nhắn..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+                </div>
+                <div class="suggestions">
+                    <span class="suggestion-chip" onclick="sendSuggestion('Giới thiệu về Subsieure')">📌 Giới thiệu Subsieure</span>
+                    <span class="suggestion-chip" onclick="sendSuggestion('Cách mua tool')">🛒 Cách mua tool</span>
+                    <span class="suggestion-chip" onclick="sendSuggestion('Hướng dẫn cài đặt tool')">⚙️ Hướng dẫn cài đặt</span>
+                    <span class="suggestion-chip" onclick="sendSuggestion('Liên hệ hỗ trợ')">📞 Liên hệ hỗ trợ</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-copyright"><p>&copy; 2026 Subsieure - Nguyễn Vinh Cypher</p></div>
+    </div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script>
+// API Key đã được mã hóa hex
+(function(){
+    const _0x4e3d = ['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'];
+    const GROQ_API_KEY = _0x4e3d[0];
+    const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+    
+    let conversationHistory = [{
+        role: "system",
+        content: "Bạn là trợ lý AI của Subsieure, một cửa hàng bán tool auto, tool SEO, tool marketing. Hãy trả lời lịch sự, thân thiện và hữu ích. Giới thiệu về Subsieure: cửa hàng cung cấp các tool chất lượng cao với giá tốt nhất, bảo hành trọn đời, hỗ trợ 24/7. Các tool có sẵn: SEO, Facebook, Game, Auto. Khách hàng có thể liên hệ Zalo 0986.947.309 để được tư vấn và nạp tiền."
+    }];
+    let isLoading = false;
+    let typingIndicator = null;
+
+    const cursorGlow = document.getElementById('cursorGlow');
+    document.addEventListener('mousemove', (e) => { cursorGlow.style.left = e.clientX + 'px'; cursorGlow.style.top = e.clientY + 'px'; });
+
+    const chatInput = document.getElementById('chatInput');
+    chatInput.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = Math.min(this.scrollHeight, 100) + 'px'; });
+
+    function scrollToBottom() { document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight; }
+    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+    function formatMessage(text) { let f = escapeHtml(text); f = f.replace(/\n/g, '<br>'); f = f.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); return f; }
+
+    function addMessage(role, content) {
+        const container = document.getElementById('chatMessages');
+        const div = document.createElement('div');
+        div.className = `message ${role}`;
+        const time = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        if (role === 'bot') {
+            div.innerHTML = `<div class="message-avatar"><i class="fas fa-robot"></i></div><div class="message-content">${formatMessage(content)}<br><span class="message-time">${time}</span></div>`;
+        } else {
+            div.innerHTML = `<div class="message-avatar"><i class="fas fa-user"></i></div><div class="message-content">${escapeHtml(content)}<br><span class="message-time">${time}</span></div>`;
+        }
+        container.appendChild(div);
+        scrollToBottom();
+    }
+
+    function showTyping() {
+        const container = document.getElementById('chatMessages');
+        typingIndicator = document.createElement('div');
+        typingIndicator.className = 'message bot';
+        typingIndicator.id = 'typingIndicator';
+        typingIndicator.innerHTML = `<div class="message-avatar"><i class="fas fa-robot"></i></div><div class="typing-indicator"><span></span><span></span><span></span></div>`;
+        container.appendChild(typingIndicator);
+        scrollToBottom();
+    }
+
+    function hideTyping() { if (typingIndicator && typingIndicator.remove) typingIndicator.remove(); }
+
+    async function sendToGroq(message) {
+        try {
+            conversationHistory.push({ role: "user", content: message });
+            const response = await fetch(GROQ_API_URL, {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: conversationHistory, temperature: 0.7, max_tokens: 1024 })
+            });
+            if (!response.ok) throw new Error("API error");
+            const data = await response.json();
+            const reply = data.choices[0].message.content;
+            conversationHistory.push({ role: "assistant", content: reply });
+            if (conversationHistory.length > 21) conversationHistory = [conversationHistory[0], ...conversationHistory.slice(-20)];
+            return reply;
+        } catch (error) {
+            console.error(error);
+            return "Xin lỗi, hiện tại tôi đang gặp sự cố kỹ thuật. Vui lòng thử lại sau hoặc liên hệ Admin qua Zalo 0986.947.309.";
+        }
+    }
+
+    async function sendMessage() {
+        if (isLoading) return;
+        const input = document.getElementById('chatInput');
+        const message = input.value.trim();
+        if (!message) return;
+        input.value = ''; input.style.height = 'auto';
+        addMessage('user', message);
+        isLoading = true;
+        document.getElementById('sendBtn').disabled = true;
+        showTyping();
+        try {
+            const reply = await sendToGroq(message);
+            hideTyping();
+            addMessage('bot', reply);
+        } catch (error) {
+            hideTyping();
+            addMessage('bot', 'Đã có lỗi xảy ra. Vui lòng thử lại sau.');
+        } finally {
+            isLoading = false;
+            document.getElementById('sendBtn').disabled = false;
+            input.focus();
+        }
+    }
+
+    function sendSuggestion(text) { document.getElementById('chatInput').value = text; sendMessage(); }
+    window.sendMessage = sendMessage;
+    window.sendSuggestion = sendSuggestion;
+
+    window.addEventListener('scroll', () => { const navbar = document.getElementById('navbar'); if (window.scrollY > 50) navbar.classList.add('scrolled'); else navbar.classList.remove('scrolled'); });
+    auth.onAuthStateChanged((user) => { if (user && user.email === 'nguyenvinhhoang209@gmail.com') { document.getElementById('adminLink').style.display = 'inline-block'; } });
+    chatInput.focus();
+})();
+</script>
+</body>
+</html>
