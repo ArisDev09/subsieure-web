@@ -11,6 +11,10 @@
     <meta name="description" content="Subsieure - Cửa hàng tool auto, tool SEO, tool marketing chất lượng cao.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Cloudflare Turnstile CAPTCHA -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
@@ -27,6 +31,81 @@
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: white; overflow-x: hidden; }
+        
+        /* CAPTCHA Overlay - Hiện đầu tiên */
+        .captcha-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 20000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.5s ease;
+        }
+        .captcha-overlay.hide {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .captcha-box {
+            background: linear-gradient(135deg, #121218, #0d0d12);
+            border: 1px solid rgba(0,245,255,0.3);
+            border-radius: 32px;
+            padding: 48px;
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            animation: fadeInScale 0.3s ease;
+        }
+        .captcha-box h2 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #00f5ff, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .captcha-box p {
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        .captcha-box .cf-turnstile {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .verify-status {
+            margin-top: 16px;
+            font-size: 13px;
+            color: #f59e0b;
+        }
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        /* Main Content - Ẩn ban đầu */
+        .main-content {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease;
+        }
+        .main-content.show {
+            opacity: 1;
+            visibility: visible;
+        }
         
         .cursor-glow {
             position: fixed;
@@ -167,7 +246,7 @@
         .balance-badge { background: rgba(0,245,255,0.1); padding: 8px 16px; border-radius: 40px; font-size: 14px; transition: all 0.3s; }
         .balance-badge:hover { background: rgba(0,245,255,0.2); transform: scale(1.02); }
         .balance-badge i { color: #00f5ff; margin-right: 8px; }
-        .btn-recharge { background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 8px 16px; border-radius: 40px; color: white; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
+        .btn-recharge { background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 8px 16px; border-radius: 40px; color: white; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; }
         .btn-recharge:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(16,185,129,0.4); }
         .user-menu { position: relative; }
         .user-avatar { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px 16px; background: rgba(255,255,255,0.05); border-radius: 40px; transition: all 0.3s; }
@@ -448,13 +527,10 @@
             margin-bottom: 16px;
         }
         .tool-price-slider span { font-size: 12px; color: var(--text-muted); }
-        .btn-buy-slider {
+        .btn-action-slider {
             width: 100%;
             padding: 12px;
-            background: var(--gradient-1);
-            border: none;
             border-radius: 40px;
-            color: #000;
             font-weight: 600;
             font-size: 14px;
             cursor: pointer;
@@ -463,10 +539,24 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            border: none;
+        }
+        .btn-buy-slider {
+            background: var(--gradient-1);
+            color: #000;
         }
         .btn-buy-slider:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,245,255,0.4);
+        }
+        .btn-view-slider {
+            background: rgba(0,245,255,0.15);
+            color: #00f5ff;
+            border: 1px solid rgba(0,245,255,0.3);
+        }
+        .btn-view-slider:hover {
+            background: rgba(0,245,255,0.3);
+            transform: translateY(-2px);
         }
         
         .loading-wrapper {
@@ -550,12 +640,6 @@
         .contact-stat i { font-size: 48px; color: #00f5ff; margin-bottom: 16px; display: block; }
         .contact-stat h4 { font-size: 32px; font-weight: 800; color: #00f5ff; margin-bottom: 8px; }
         .contact-stat p { font-size: 14px; color: var(--text-muted); }
-        
-        .recharge-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(20px); z-index: 3000; align-items: center; justify-content: center; }
-        .recharge-modal.active { display: flex; }
-        .recharge-card { background: linear-gradient(135deg, #0f0f1a, #0a0a0f); border: 1px solid rgba(0,245,255,0.3); border-radius: 48px; padding: 48px; max-width: 480px; width: 90%; text-align: center; position: relative; }
-        .close-recharge { position: absolute; top: 20px; right: 24px; background: none; border: none; color: #888; font-size: 28px; cursor: pointer; }
-        .close-recharge:hover { color: #ef4444; }
         
         .edit-tool-modal {
             display: none;
@@ -704,7 +788,6 @@
         @media (max-width: 480px) {
             .hero-title { font-size: 28px; }
             .hero-stat-number { font-size: 24px; }
-            .recharge-card { padding: 32px 24px; }
             .tool-card-slider { flex: 0 0 100%; min-width: 100%; }
             .auth-buttons { display: none; }
         }
@@ -714,13 +797,26 @@
 
 <div class="cursor-glow" id="cursorGlow"></div>
 
+<!-- CAPTCHA OVERLAY - HIỆN ĐẦU TIÊN -->
+<div class="captcha-overlay" id="captchaOverlay">
+    <div class="captcha-box">
+        <h2>🔒 XÁC THỰC BẢO MẬT</h2>
+        <p>Vui lòng xác nhận bạn không phải là robot để tiếp tục</p>
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAADYpcVHfLWdwc6lA" data-theme="dark" data-callback="onCaptchaSuccess"></div>
+        <div class="verify-status" id="verifyStatus">Đang chờ xác thực...</div>
+    </div>
+</div>
+
+<!-- NỘI DUNG CHÍNH - ẨN BAN ĐẦU -->
+<div class="main-content" id="mainContent">
+
 <a href="https://zalo.me/0986947309" target="_blank" class="zalo-bubble">
     <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/01/Logo-Zalo-Arc.png" alt="Zalo">
 </a>
 
 <nav class="navbar" id="navbar">
     <div class="nav-container">
-        <a href="#home" class="nav-logo">
+        <a href="#home" class="nav-logo no-loading">
             <img src="https://d2eioyamun8mp1.cloudfront.net/images/1778429322279_xe9Oxxk0FV.png" alt="Subsieure">
             <span>Subsieure</span>
         </a>
@@ -735,7 +831,7 @@
             <div id="userInfo" style="display: none;">
                 <div class="balance-wrapper">
                     <div class="balance-badge"><i class="fas fa-coins"></i><span id="userBalance">0</span>đ</div>
-                    <button class="btn-recharge" id="showRechargeModal"><i class="fas fa-plus-circle"></i> Nạp tiền</button>
+                    <a href="chuyentien.html" class="btn-recharge no-loading"><i class="fas fa-plus-circle"></i> Nạp tiền</a>
                 </div>
                 <div class="user-menu">
                     <div class="user-avatar"><i class="fas fa-user-circle"></i><span id="userEmailShort"></span><i class="fas fa-chevron-down"></i></div>
@@ -743,8 +839,8 @@
                 </div>
             </div>
             <div id="authButtons" class="auth-buttons">
-                <a href="login.html" class="btn-login-nav">Đăng nhập</a>
-                <a href="register.html" class="btn-register-nav">Đăng ký</a>
+                <a href="login.html" class="btn-login-nav no-loading">Đăng nhập</a>
+                <a href="register.html" class="btn-register-nav no-loading">Đăng ký</a>
             </div>
         </div>
     </div>
@@ -920,20 +1016,6 @@
     </div>
 </footer>
 
-<div id="rechargeModal" class="recharge-modal">
-    <div class="recharge-card">
-        <button class="close-recharge" id="closeRechargeModal">&times;</button>
-        <div style="width:80px;height:80px;background:linear-gradient(135deg,rgba(0,245,255,0.2),rgba(16,185,129,0.2));border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;border:1px solid rgba(0,245,255,0.3);"><i class="fas fa-coins" style="font-size:40px;color:#00f5ff;"></i></div>
-        <h2 style="font-family:'Space Grotesk';font-size:28px;font-weight:700;background:linear-gradient(135deg,#00f5ff,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">⚡ NẠP TIỀN VÍ ⚡</h2>
-        <p style="color:#a0a0b0;margin:24px 0;">Vui lòng liên hệ với Admin để được tư vấn chi tiết về cách nạp tiền và nhận ưu đãi hấp dẫn!</p>
-        <div style="display:flex;justify-content:center;gap:24px;margin-bottom:32px;">
-            <a href="https://zalo.me/0986947309" target="_blank" style="width:64px;height:64px;background:rgba(255,255,255,0.03);border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.1);"><img src="https://cdn.haitrieu.com/wp-content/uploads/2022/01/Logo-Zalo-Arc.png" alt="Zalo" style="height:32px;width:auto;"></a>
-            <a href="https://www.facebook.com/nguyenvinhcypher09/" target="_blank" id="fbRechargeLink" style="width:64px;height:64px;background:rgba(255,255,255,0.03);border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.1);"><i class="fab fa-facebook-f" style="font-size:28px;color:#1877f2;"></i></a>
-        </div>
-        <div style="font-size:13px;color:#666;border-top:1px solid rgba(255,255,255,0.05);padding-top:24px;"><i class="fas fa-headset"></i> Hỗ trợ 24/7 - Phản hồi nhanh chóng</div>
-    </div>
-</div>
-
 <div id="editToolModal" class="edit-tool-modal">
     <div class="edit-tool-card">
         <h3><i class="fas fa-edit"></i> Chỉnh sửa tool</h3>
@@ -957,10 +1039,29 @@
     </div>
 </div>
 
+</div> <!-- Kết thúc main-content -->
+
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/loading.js"></script>
 <script>
+    // CAPTCHA Success Callback
+    window.onCaptchaSuccess = function(token) {
+        console.log("CAPTCHA verified successfully");
+        document.getElementById('verifyStatus').innerHTML = '✅ Xác thực thành công! Đang tải nội dung...';
+        document.getElementById('verifyStatus').style.color = '#10b981';
+        
+        // Ẩn overlay CAPTCHA
+        setTimeout(function() {
+            document.getElementById('captchaOverlay').classList.add('hide');
+            // Hiện nội dung chính
+            document.getElementById('mainContent').classList.add('show');
+        }, 500);
+    };
+    
+    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyDyLM8PdOKwpzXu-SHV3YAzU28gL2QE4KY",
         authDomain: "subsieure-toolshop.firebaseapp.com",
@@ -984,6 +1085,7 @@
     let slidesPerView = 4;
     let maxSlideIndex = 0;
     let isAdmin = false;
+    let purchasedToolIds = [];
     
     const cursorGlow = document.getElementById('cursorGlow');
     document.addEventListener('mousemove', (e) => {
@@ -1012,6 +1114,29 @@
         updateSlidesPerView();
     });
     
+    async function loadPurchasedTools() {
+        if (!currentUser) {
+            purchasedToolIds = [];
+            return;
+        }
+        try {
+            const snapshot = await db.collection('transactions')
+                .where('userId', '==', currentUser.uid)
+                .where('type', '==', 'purchase')
+                .get();
+            purchasedToolIds = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.toolId) {
+                    purchasedToolIds.push(data.toolId);
+                }
+            });
+            renderSlider();
+        } catch (error) {
+            console.error("Lỗi load purchased tools:", error);
+        }
+    }
+    
     function renderSlider() {
         const track = document.getElementById('toolsSliderTrack');
         if (!track) return;
@@ -1024,7 +1149,13 @@
         const startIndex = currentSlideIndex * slidesPerView;
         const visibleTools = allTools.slice(startIndex, startIndex + slidesPerView);
         
-        track.innerHTML = visibleTools.map((tool) => `
+        track.innerHTML = visibleTools.map((tool) => {
+            const isPurchased = purchasedToolIds.includes(tool.id);
+            const buttonHtml = isPurchased 
+                ? `<a href="products.html?id=${tool.id}" class="btn-action-slider btn-view-slider"><i class="fas fa-eye"></i> Xem ngay</a>`
+                : `<button class="btn-action-slider btn-buy-slider" onclick="event.stopPropagation(); buyTool('${tool.id}', '${escapeHtml(tool.name)}', ${tool.price})"><i class="fas fa-shopping-cart"></i> Mua ngay</button>`;
+            
+            return `
             <div class="tool-card-slider">
                 <div class="tool-image-wrapper-slider">
                     <a href="products.html?id=${tool.id}" style="text-decoration: none; display: block;">
@@ -1042,12 +1173,10 @@
                     <h3 class="tool-name-slider"><a href="products.html?id=${tool.id}">${escapeHtml(tool.name)}</a></h3>
                     <p class="tool-desc-slider">${escapeHtml((tool.shortDescription || tool.description || '').substring(0, 80))}...</p>
                     <div class="tool-price-slider">${tool.price === 0 ? 'Free' : formatPrice(tool.price) + '<span>đ</span>'}</div>
-                    <button class="btn-buy-slider" onclick="event.stopPropagation(); buyTool('${tool.id}', '${escapeHtml(tool.name)}', ${tool.price})">
-                        <i class="fas fa-shopping-cart"></i> Mua ngay
-                    </button>
+                    ${buttonHtml}
                 </div>
             </div>
-        `).join('');
+        `}).join('');
     }
     
     function updateSliderButtons() {
@@ -1101,9 +1230,12 @@
                     document.getElementById('userBalance').innerText = userBalance.toLocaleString('vi-VN');
                 }
             } catch(e) { console.error("Lỗi lấy user:", e); }
+            
+            await loadPurchasedTools();
         } else {
             currentUser = null;
             isAdmin = false;
+            purchasedToolIds = [];
             document.getElementById('authButtons').style.display = 'flex';
             document.getElementById('userInfo').style.display = 'none';
             document.getElementById('adminLink').style.display = 'none';
@@ -1165,7 +1297,7 @@
                 cancelButtonColor: '#ef4444'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    openRechargeModal();
+                    window.location.href = 'chuyentien.html';
                 }
             });
             return;
@@ -1188,6 +1320,22 @@
                     try {
                         const toolDoc = await db.collection('tools').doc(id).get();
                         const link = toolDoc.data().downloadLink || '#';
+                        
+                        await db.collection('transactions').add({
+                            userId: currentUser.uid,
+                            userEmail: currentUser.email,
+                            toolId: id,
+                            toolName: name,
+                            amount: 0,
+                            type: 'purchase',
+                            status: 'success',
+                            downloadLink: link,
+                            createdAt: new Date()
+                        });
+                        
+                        purchasedToolIds.push(id);
+                        renderSlider();
+                        
                         Swal.fire({
                             title: 'Tải thành công!',
                             text: `Tool "${name}" đã sẵn sàng để tải.`,
@@ -1253,6 +1401,8 @@
                     
                     userBalance -= price;
                     document.getElementById('userBalance').innerText = userBalance.toLocaleString('vi-VN');
+                    purchasedToolIds.push(id);
+                    renderSlider();
                     
                     Swal.fire({
                         title: 'Mua thành công!',
@@ -1279,7 +1429,7 @@
                             background: '#121218',
                             color: '#fff',
                             confirmButtonColor: '#10b981'
-                        }).then(() => { openRechargeModal(); });
+                        }).then(() => { window.location.href = 'chuyentien.html'; });
                     } else {
                         Swal.fire({ title: 'Lỗi', text: e.message, icon: 'error', background: '#121218', color: '#fff', confirmButtonColor: '#00f5ff' });
                     }
@@ -1329,6 +1479,7 @@
                         timer: 1500
                     });
                     await loadTools();
+                    if (currentUser) await loadPurchasedTools();
                 } catch (error) {
                     Swal.fire({
                         title: 'Lỗi!',
@@ -1386,13 +1537,6 @@
         document.getElementById('editToolModal').classList.remove('active');
         document.body.style.overflow = '';
     });
-    
-    const rechargeModal = document.getElementById('rechargeModal');
-    function openRechargeModal() { rechargeModal.classList.add('active'); document.body.style.overflow = 'hidden'; }
-    function closeRechargeModalFunc() { rechargeModal.classList.remove('active'); document.body.style.overflow = ''; }
-    document.getElementById('showRechargeModal')?.addEventListener('click', openRechargeModal);
-    document.getElementById('closeRechargeModal')?.addEventListener('click', closeRechargeModalFunc);
-    window.addEventListener('click', (e) => { if(e.target === rechargeModal) closeRechargeModalFunc(); });
     
     document.getElementById('logoutBtn')?.addEventListener('click', async() => { await auth.signOut(); window.location.reload(); });
     

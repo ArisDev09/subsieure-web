@@ -82,7 +82,7 @@
         .balance-badge { background: rgba(0,245,255,0.1); padding: 8px 16px; border-radius: 40px; font-size: 14px; transition: all 0.3s; }
         .balance-badge:hover { background: rgba(0,245,255,0.2); transform: scale(1.02); }
         .balance-badge i { color: #00f5ff; margin-right: 8px; }
-        .btn-recharge { background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 8px 16px; border-radius: 40px; color: white; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
+        .btn-recharge { background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 8px 16px; border-radius: 40px; color: white; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; }
         .btn-recharge:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(16,185,129,0.4); }
         .user-menu { position: relative; }
         .user-avatar { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px 16px; background: rgba(255,255,255,0.05); border-radius: 40px; transition: all 0.3s; }
@@ -174,13 +174,15 @@
         .tool-price { font-size: 28px; font-weight: 800; color: #00f5ff; margin-bottom: 20px; }
         .tool-price span { font-size: 14px; color: var(--text-muted); }
         .card-buttons { display: flex; gap: 12px; }
-        .btn-detail, .btn-buy-card { flex: 1; padding: 12px; border-radius: 40px; font-weight: 600; font-size: 14px; cursor: pointer; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; }
+        .btn-detail, .btn-buy-card, .btn-view-card { flex: 1; padding: 12px; border-radius: 40px; font-weight: 600; font-size: 14px; cursor: pointer; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; }
         .btn-detail { background: rgba(255,255,255,0.05); border: 1px solid var(--border-light); color: white; }
         .btn-detail:hover { background: rgba(0,245,255,0.15); border-color: #00f5ff; color: #00f5ff; transform: translateY(-2px); }
         .btn-buy-card { background: var(--gradient-1); color: #000; border: none; position: relative; overflow: hidden; }
         .btn-buy-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); transition: left 0.5s; }
         .btn-buy-card:hover::before { left: 100%; }
         .btn-buy-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,245,255,0.4); }
+        .btn-view-card { background: rgba(0,245,255,0.15); color: #00f5ff; border: 1px solid rgba(0,245,255,0.3); }
+        .btn-view-card:hover { background: rgba(0,245,255,0.3); transform: translateY(-2px); }
         
         .pagination { display: flex; justify-content: center; gap: 12px; margin-top: 60px; flex-wrap: wrap; }
         .page-btn { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid var(--border-light); border-radius: 14px; color: var(--text-secondary); cursor: pointer; transition: all 0.3s; font-weight: 500; }
@@ -248,12 +250,6 @@
         .footer { border-top: 1px solid var(--border-light); padding: 40px 0; margin-top: 0; text-align: center; }
         .footer-copyright { color: var(--text-muted); font-size: 14px; }
         
-        .recharge-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(20px); z-index: 3000; align-items: center; justify-content: center; animation: fadeIn 0.3s ease; }
-        .recharge-modal.active { display: flex; }
-        .recharge-card { background: linear-gradient(135deg, #0f0f1a, #0a0a0f); border: 1px solid rgba(0,245,255,0.3); border-radius: 48px; padding: 48px; max-width: 480px; width: 90%; text-align: center; position: relative; animation: scaleIn 0.3s ease; }
-        .close-recharge { position: absolute; top: 20px; right: 24px; background: none; border: none; color: #888; font-size: 28px; cursor: pointer; transition: color 0.3s; }
-        .close-recharge:hover { color: #ef4444; }
-        
         .zalo-bubble {
             position: fixed;
             bottom: 30px;
@@ -309,7 +305,6 @@
         }
         @media (max-width: 480px) {
             .page-header h1 { font-size: 28px; }
-            .recharge-card { padding: 32px 24px; }
             .empty-state { padding: 40px 20px; }
             .loading-wrapper { padding: 40px 20px; }
         }
@@ -325,7 +320,7 @@
 
 <nav class="navbar" id="navbar">
     <div class="nav-container">
-        <a href="index.html" class="nav-logo" style="text-decoration: none;">
+        <a href="index.html" class="nav-logo no-loading" style="text-decoration: none;">
             <img src="https://d2eioyamun8mp1.cloudfront.net/images/1778429322279_xe9Oxxk0FV.png" alt="Subsieure">
             <span>Subsieure</span>
         </a>
@@ -340,14 +335,14 @@
             <div id="userInfo" style="display: none;">
                 <div class="balance-wrapper">
                     <div class="balance-badge"><i class="fas fa-coins"></i><span id="userBalance">0</span>đ</div>
-                    <button class="btn-recharge" id="showRechargeModal"><i class="fas fa-plus-circle"></i> Nạp tiền</button>
+                    <a href="chuyentien.html" class="btn-recharge no-loading"><i class="fas fa-plus-circle"></i> Nạp tiền</a>
                 </div>
                 <div class="user-menu">
                     <div class="user-avatar"><i class="fas fa-user-circle"></i><span id="userEmailShort"></span><i class="fas fa-chevron-down"></i></div>
                     <div class="user-dropdown"><a href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a><a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></div>
                 </div>
             </div>
-            <a href="login.html" class="btn-outline" id="loginBtn">Đăng nhập</a>
+            <a href="login.html" class="btn-outline no-loading" id="loginBtn">Đăng nhập</a>
         </div>
     </div>
 </nav>
@@ -404,45 +399,15 @@
     </div>
 </footer>
 
-<div id="rechargeModal" class="recharge-modal">
-    <div class="recharge-card">
-        <button class="close-recharge" id="closeRechargeModal">&times;</button>
-        <div style="width:80px;height:80px;background:linear-gradient(135deg,rgba(0,245,255,0.2),rgba(16,185,129,0.2));border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;border:1px solid rgba(0,245,255,0.3);"><i class="fas fa-coins" style="font-size:40px;color:#00f5ff;"></i></div>
-        <h2 style="font-family:'Space Grotesk';font-size:28px;font-weight:700;background:linear-gradient(135deg,#00f5ff,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">⚡ NẠP TIỀN VÍ ⚡</h2>
-        <p style="color:#a0a0b0;margin:24px 0;">Vui lòng liên hệ với Admin để được tư vấn chi tiết về cách nạp tiền và nhận ưu đãi hấp dẫn!</p>
-        <div style="display:flex;justify-content:center;gap:24px;margin-bottom:32px;">
-            <a href="https://zalo.me/0986947309" target="_blank" style="width:64px;height:64px;background:rgba(255,255,255,0.03);border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.1);"><img src="https://cdn.haitrieu.com/wp-content/uploads/2022/01/Logo-Zalo-Arc.png" alt="Zalo" style="height:32px;width:auto;"></a>
-            <a href="https://www.facebook.com/subsieure.page" target="_blank" id="fbRechargeLink" style="width:64px;height:64px;background:rgba(255,255,255,0.03);border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.1);"><i class="fab fa-facebook-f" style="font-size:28px;color:#1877f2;"></i></a>
-        </div>
-        <div style="font-size:13px;color:#666;border-top:1px solid rgba(255,255,255,0.05);padding-top:24px;"><i class="fas fa-headset"></i> Hỗ trợ 24/7 - Phản hồi nhanh chóng</div>
-    </div>
-</div>
-
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyDyLM8PdOKwpzXu-SHV3YAzU28gL2QE4KY",
-        authDomain: "subsieure-toolshop.firebaseapp.com",
-        projectId: "subsieure-toolshop",
-        storageBucket: "subsieure-toolshop.firebasestorage.app",
-        messagingSenderId: "277182125256",
-        appId: "1:277182125256:web:b0a98cb19d06d046ce81fd"
-    };
-    
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-</script>
+<script src="js/sanpham.js"></script>
+<script src="js/loading.js"></script>
 <script>
     let allTools = [], filteredTools = [], currentUser = null, userBalance = 0;
     let currentCategory = 'all', currentSort = 'default', searchKeyword = '', currentPage = 1;
+    let purchasedToolIds = [];
     const itemsPerPage = 9;
     
     const langNames = { python: 'Python', rust: 'Rust', cpp: 'C++', html: 'HTML', js: 'JavaScript', php: 'PHP', java: 'Java', go: 'Go' };
@@ -460,7 +425,7 @@
         else navbar.classList.remove('scrolled');
     });
     
-    function showLoading() {
+    function showLoadingGrid() {
         document.getElementById('productsGrid').innerHTML = `
             <div class="loading-wrapper">
                 <div class="loading-spinner"></div>
@@ -469,9 +434,30 @@
         `;
     }
     
-    function hideLoading() {}
+    async function loadPurchasedTools() {
+        if (!currentUser) {
+            purchasedToolIds = [];
+            return;
+        }
+        try {
+            const snapshot = await window.db.collection('transactions')
+                .where('userId', '==', currentUser.uid)
+                .where('type', '==', 'purchase')
+                .get();
+            purchasedToolIds = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.toolId) {
+                    purchasedToolIds.push(data.toolId);
+                }
+            });
+            renderProducts();
+        } catch (error) {
+            console.error("Lỗi load purchased tools:", error);
+        }
+    }
     
-    auth.onAuthStateChanged(async (user) => {
+    window.auth.onAuthStateChanged(async (user) => {
         if (user) {
             currentUser = user;
             document.getElementById('loginBtn').style.display = 'none';
@@ -479,11 +465,13 @@
             document.getElementById('userEmailShort').innerText = user.email.split('@')[0];
             if (user.email === 'nguyenvinhhoang209@gmail.com') document.getElementById('adminLink').style.display = 'inline-block';
             try {
-                const userDoc = await db.collection('users').doc(user.uid).get();
+                const userDoc = await window.db.collection('users').doc(user.uid).get();
                 if (userDoc.exists) { userBalance = userDoc.data().balance || 0; document.getElementById('userBalance').innerText = userBalance.toLocaleString('vi-VN'); }
             } catch(e) { console.error("Lỗi lấy user:", e); }
+            await loadPurchasedTools();
         } else { 
             currentUser = null; 
+            purchasedToolIds = [];
             document.getElementById('loginBtn').style.display = 'flex'; 
             document.getElementById('userInfo').style.display = 'none'; 
         }
@@ -491,14 +479,13 @@
     });
     
     async function loadAllTools() {
-        showLoading();
+        showLoadingGrid();
         try {
-            if (!db) {
-                console.error("Firestore chưa sẵn sàng, thử lại sau 500ms");
+            if (!window.db) {
                 setTimeout(loadAllTools, 500);
                 return;
             }
-            const snapshot = await db.collection('tools').get();
+            const snapshot = await window.db.collection('tools').get();
             allTools = [];
             snapshot.forEach(doc => allTools.push({ id: doc.id, ...doc.data() }));
             applyFiltersAndSort();
@@ -529,7 +516,13 @@
             document.getElementById('productsGrid').innerHTML = `<div class="empty-state"><i class="fas fa-search"></i><h3>Không tìm thấy sản phẩm</h3><p>Rất tiếc, không có sản phẩm nào phù hợp với tiêu chí của bạn</p></div>`;
             return; 
         }
-        document.getElementById('productsGrid').innerHTML = pageTools.map((t, idx) => `
+        document.getElementById('productsGrid').innerHTML = pageTools.map((t, idx) => {
+            const isPurchased = purchasedToolIds.includes(t.id);
+            const actionButton = isPurchased 
+                ? `<a href="products.html?id=${t.id}" class="btn-view-card"><i class="fas fa-eye"></i> Xem ngay</a>`
+                : `<button class="btn-buy-card" onclick="buyTool('${t.id}', '${escapeHtml(t.name)}', ${t.price})"><i class="fas fa-shopping-cart"></i> Mua</button>`;
+            
+            return `
             <div class="tool-card" style="animation-delay: ${(idx % 9) * 0.05}s">
                 <div class="tool-image-wrapper">
                     <img src="${t.image || 'https://placehold.co/600x400/1a1a1a/00f5ff?text=Tool'}" class="tool-image" onerror="this.src='https://placehold.co/600x400/1a1a1a/00f5ff?text=Tool'">
@@ -545,11 +538,11 @@
                     <div class="tool-price">${t.price === 0 ? 'Free' : formatPrice(t.price) + '<span>đ</span>'}</div>
                     <div class="card-buttons">
                         <a href="products.html?id=${t.id}" class="btn-detail"><i class="fas fa-eye"></i> Chi tiết</a>
-                        <button class="btn-buy-card" onclick="buyTool('${t.id}', '${escapeHtml(t.name)}', ${t.price})"><i class="fas fa-shopping-cart"></i> Mua</button>
+                        ${actionButton}
                     </div>
                 </div>
             </div>
-        `).join('');
+        `}).join('');
     }
     
     function renderPagination() {
@@ -568,61 +561,162 @@
     window.changePage = function(p){ const total = Math.ceil(filteredTools.length / itemsPerPage); if(p < 1 || p > total) return; currentPage = p; renderProducts(); renderPagination(); window.scrollTo({ top: 400, behavior: 'smooth' }); };
     
     window.buyTool = async (id, name, price) => {
-        if(!currentUser){ if(confirm('Đăng nhập để mua tool?')) window.location.href = 'login.html'; return; }
-        if(price > 0 && userBalance < price){ alert(`Số dư không đủ! Liên hệ Admin nạp tiền.\nSố dư: ${formatPrice(userBalance)}đ`); openRechargeModal(); return; }
+        if(!currentUser){ 
+            Swal.fire({
+                title: 'Chưa đăng nhập',
+                text: 'Bạn cần đăng nhập để mua tool!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Đăng nhập ngay',
+                cancelButtonText: 'Hủy',
+                background: '#121218',
+                color: '#fff',
+                confirmButtonColor: '#00f5ff',
+                cancelButtonColor: '#ef4444'
+            }).then((result) => {
+                if (result.isConfirmed) window.location.href = 'login.html';
+            });
+            return; 
+        }
+        if(price > 0 && userBalance < price){ 
+            Swal.fire({
+                title: 'Số dư không đủ!',
+                text: `Bạn cần ${formatPrice(price)}đ nhưng chỉ có ${formatPrice(userBalance)}đ.\nVui lòng nạp thêm tiền.`,
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonText: 'Nạp tiền ngay',
+                cancelButtonText: 'Hủy',
+                background: '#121218',
+                color: '#fff',
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#ef4444'
+            }).then((result) => {
+                if (result.isConfirmed) window.location.href = 'chuyentien.html';
+            });
+            return; 
+        }
         if(price === 0){
-            try {
-                const toolDoc = await db.collection('tools').doc(id).get();
-                const link = toolDoc.data().downloadLink || '#';
-                alert(`Tải tool miễn phí thành công!\nLink: ${link}`);
-                if(link !== '#') window.open(link, '_blank');
-            } catch(e) { alert('Lỗi: ' + e.message); }
+            Swal.fire({
+                title: 'Xác nhận tải tool miễn phí',
+                text: `Bạn có chắc chắn muốn tải tool "${name}" miễn phí?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Có, tải ngay',
+                cancelButtonText: 'Hủy',
+                background: '#121218',
+                color: '#fff',
+                confirmButtonColor: '#00f5ff',
+                cancelButtonColor: '#ef4444'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const toolDoc = await window.db.collection('tools').doc(id).get();
+                        const link = toolDoc.data().downloadLink || '#';
+                        await window.db.collection('transactions').add({
+                            userId: currentUser.uid,
+                            userEmail: currentUser.email,
+                            toolId: id,
+                            toolName: name,
+                            amount: 0,
+                            type: 'purchase',
+                            status: 'success',
+                            downloadLink: link,
+                            createdAt: new Date()
+                        });
+                        purchasedToolIds.push(id);
+                        renderProducts();
+                        Swal.fire({
+                            title: 'Tải thành công!',
+                            text: `Tool "${name}" đã sẵn sàng để tải.`,
+                            icon: 'success',
+                            confirmButtonText: 'Tải xuống',
+                            background: '#121218',
+                            color: '#fff',
+                            confirmButtonColor: '#00f5ff'
+                        }).then(() => {
+                            if (link !== '#') window.open(link, '_blank');
+                        });
+                    } catch(e) {
+                        Swal.fire({ title: 'Lỗi', text: e.message, icon: 'error', background: '#121218', color: '#fff', confirmButtonColor: '#00f5ff' });
+                    }
+                }
+            });
             return;
         }
-        if(confirm(`Mua "${name}" giá ${formatPrice(price)}đ?`)){
-            showLoading();
-            try{
-                const toolDoc = await db.collection('tools').doc(id).get();
-                const link = toolDoc.data().downloadLink || '#';
-                await db.runTransaction(async(t)=>{
-                    const userRef = db.collection('users').doc(currentUser.uid);
-                    const userDoc = await t.get(userRef);
-                    const currentBalance = userDoc.data().balance || 0;
-                    if (currentBalance < price) throw new Error("Số dư không đủ");
-                    t.update(userRef,{balance: currentBalance - price});
-                    t.set(db.collection('transactions').doc(),{userId:currentUser.uid,userEmail:currentUser.email,toolId:id,toolName:name,amount:price,type:'purchase',status:'success',downloadLink:link,createdAt:new Date()});
+        
+        Swal.fire({
+            title: 'Xác nhận mua tool',
+            html: `Bạn có chắc chắn muốn mua <strong>${name}</strong> với giá <strong style="color:#00f5ff">${formatPrice(price)}đ</strong>?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Có, mua ngay',
+            cancelButtonText: 'Hủy',
+            background: '#121218',
+            color: '#fff',
+            confirmButtonColor: '#00f5ff',
+            cancelButtonColor: '#ef4444'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Đang xử lý...',
+                    text: 'Vui lòng chờ trong giây lát',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); },
+                    background: '#121218'
                 });
-                userBalance -= price;
-                document.getElementById('userBalance').innerText = userBalance.toLocaleString('vi-VN');
-                alert(`Mua thành công!\nLink: ${link}`);
-                if(link !== '#') window.open(link, '_blank');
-                loadAllTools();
-            } catch(e){ 
-                alert('Lỗi: ' + e.message); 
-                if(e.message === "Số dư không đủ") {
-                    const userDoc = await db.collection('users').doc(currentUser.uid).get();
-                    userBalance = userDoc.data().balance || 0;
+                try{
+                    const toolDoc = await window.db.collection('tools').doc(id).get();
+                    const link = toolDoc.data().downloadLink || '#';
+                    await window.db.runTransaction(async(t)=>{
+                        const userRef = window.db.collection('users').doc(currentUser.uid);
+                        const userDoc = await t.get(userRef);
+                        const currentBalance = userDoc.data().balance || 0;
+                        if (currentBalance < price) throw new Error("Số dư không đủ");
+                        t.update(userRef,{balance: currentBalance - price});
+                        t.set(window.db.collection('transactions').doc(),{userId:currentUser.uid,userEmail:currentUser.email,toolId:id,toolName:name,amount:price,type:'purchase',status:'success',downloadLink:link,createdAt:new Date()});
+                    });
+                    userBalance -= price;
                     document.getElementById('userBalance').innerText = userBalance.toLocaleString('vi-VN');
+                    purchasedToolIds.push(id);
+                    renderProducts();
+                    Swal.fire({
+                        title: 'Mua thành công!',
+                        text: `Bạn đã mua tool "${name}" thành công.`,
+                        icon: 'success',
+                        confirmButtonText: 'Tải xuống ngay',
+                        background: '#121218',
+                        color: '#fff',
+                        confirmButtonColor: '#00f5ff'
+                    }).then(() => {
+                        if (link !== '#') window.open(link, '_blank');
+                    });
+                } catch(e){ 
+                    if(e.message === "Số dư không đủ") {
+                        const userDoc = await window.db.collection('users').doc(currentUser.uid).get();
+                        userBalance = userDoc.data().balance || 0;
+                        document.getElementById('userBalance').innerText = userBalance.toLocaleString('vi-VN');
+                        Swal.fire({
+                            title: 'Số dư không đủ!',
+                            text: `Giao dịch thất bại. Số dư hiện tại: ${formatPrice(userBalance)}đ`,
+                            icon: 'error',
+                            confirmButtonText: 'Nạp tiền',
+                            background: '#121218',
+                            color: '#fff',
+                            confirmButtonColor: '#10b981'
+                        }).then(() => { window.location.href = 'chuyentien.html'; });
+                    } else {
+                        Swal.fire({ title: 'Lỗi', text: e.message, icon: 'error', background: '#121218', color: '#fff', confirmButtonColor: '#00f5ff' });
+                    }
                 }
-            } finally { 
-                document.getElementById('productsGrid').innerHTML = '<div class="loading-wrapper"><div class="loading-spinner"></div><p>Đang tải lại...</p></div>';
-                loadAllTools();
             }
-        }
+        });
     };
     
     document.querySelectorAll('.filter-btn').forEach(b=>{ b.onclick=()=>{ document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); currentCategory=b.dataset.category; applyFiltersAndSort(); }; });
     document.querySelectorAll('.sort-btn').forEach(b=>{ b.onclick=()=>{ document.querySelectorAll('.sort-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); currentSort=b.dataset.sort; applyFiltersAndSort(); }; });
     document.getElementById('searchInput').oninput = e => { searchKeyword = e.target.value; applyFiltersAndSort(); };
     
-    const rechargeModal = document.getElementById('rechargeModal');
-    function openRechargeModal() { rechargeModal.classList.add('active'); document.body.style.overflow = 'hidden'; }
-    function closeRechargeModalFunc() { rechargeModal.classList.remove('active'); document.body.style.overflow = ''; }
-    document.getElementById('showRechargeModal')?.addEventListener('click', openRechargeModal);
-    document.getElementById('closeRechargeModal')?.addEventListener('click', closeRechargeModalFunc);
-    window.addEventListener('click', (e) => { if(e.target === rechargeModal) closeRechargeModalFunc(); });
-    
-    document.getElementById('logoutBtn')?.addEventListener('click', async()=>{ await auth.signOut(); window.location.reload(); });
+    document.getElementById('logoutBtn')?.addEventListener('click', async()=>{ await window.auth.signOut(); window.location.reload(); });
     
     function formatPrice(p){ 
         if (p === 0 || p === null || p === undefined) return 'Free';

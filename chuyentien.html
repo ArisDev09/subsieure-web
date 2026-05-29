@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Nạp tiền - Subsieure</title>
+    <link rel="icon" type="image/png" href="https://d2eioyamun8mp1.cloudfront.net/images/1778429322279_xe9Oxxk0FV.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+        .video-background video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: cover;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 24px 60px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .glass-card {
+            background: rgba(18, 18, 24, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 48px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            overflow: hidden;
+        }
+        
+        .transfer-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+        
+        .left-col {
+            padding: 48px;
+            background: rgba(0, 0, 0, 0.2);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .qr-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .qr-header h3 {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 500;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        .qr-header h2 {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00f5ff, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-top: 6px;
+        }
+        
+        .qr-wrapper {
+            background: white;
+            padding: 24px;
+            border-radius: 32px;
+            text-align: center;
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .qr-wrapper img {
+            width: 100%;
+            max-width: 320px;
+            height: auto;
+            aspect-ratio: 1 / 1;
+            object-fit: contain;
+        }
+        
+        .bank-info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .bank-info-item:last-child {
+            border-bottom: none;
+        }
+        .bank-label {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .bank-value {
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            color: white;
+        }
+        .copy-icon {
+            color: #00f5ff;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .copy-icon:hover {
+            background: #00f5ff;
+            color: #000;
+            transform: scale(1.1);
+        }
+        
+        .note-warning {
+            background: rgba(239, 68, 68, 0.15);
+            border-radius: 20px;
+            padding: 12px 16px;
+            margin-top: 24px;
+            font-size: 12px;
+            color: #ff8a8a;
+            text-align: center;
+        }
+        
+        .right-col {
+            padding: 48px;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .section-title i {
+            color: #00f5ff;
+            font-size: 22px;
+        }
+        .section-title h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .amount-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .amount-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 60px;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+        .amount-btn:hover {
+            background: rgba(0, 245, 255, 0.2);
+            border-color: #00f5ff;
+            transform: translateY(-2px);
+        }
+        .amount-btn.active {
+            background: linear-gradient(135deg, #00f5ff, #0099cc);
+            border-color: transparent;
+            color: #000;
+        }
+        
+        .amount-input-wrapper {
+            position: relative;
+            margin-bottom: 28px;
+        }
+        .amount-input-custom {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 60px;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .amount-input-custom:focus {
+            outline: none;
+            border-color: #00f5ff;
+            background: rgba(0, 245, 255, 0.05);
+        }
+        .amount-input-custom::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: normal;
+        }
+        
+        .transfer-content-box {
+            background: rgba(0, 245, 255, 0.05);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 32px;
+            border: 1px solid rgba(0, 245, 255, 0.15);
+        }
+        .transfer-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .transfer-value {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 16px 18px;
+            border-radius: 18px;
+            font-family: monospace;
+            font-size: 15px;
+            word-break: break-all;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .transfer-value code {
+            color: #00f5ff;
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        .btn-zalo {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #0066cc, #004499);
+            border: none;
+            border-radius: 60px;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s;
+            margin-top: 8px;
+        }
+        .btn-zalo:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 102, 204, 0.5);
+        }
+        
+        .info-note {
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 20px;
+            padding: 16px;
+            margin-top: 24px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+        }
+        
+        /* ĐÃ SỬA: Quay lại về index.html */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            margin-bottom: 24px;
+            font-size: 14px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 60px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+        .back-link:hover {
+            color: #00f5ff;
+            background: rgba(0, 245, 255, 0.1);
+            transform: translateX(-5px);
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .glass-card {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @media (max-width: 768px) {
+            .container { padding: 70px 16px 40px; }
+            .transfer-layout { grid-template-columns: 1fr; }
+            .left-col {
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                padding: 32px;
+            }
+            .right-col { padding: 32px; }
+            .qr-wrapper img { max-width: 260px; }
+            .amount-buttons { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        @media (max-width: 480px) {
+            .left-col { padding: 24px; }
+            .right-col { padding: 24px; }
+            .bank-value { font-size: 12px; }
+            .transfer-value code { font-size: 12px; }
+            .qr-wrapper img { max-width: 220px; }
+        }
+    </style>
+</head>
+<body>
+<script src="js/loading.js"></script>
+<div class="video-background">
+    <video autoplay loop muted playsinline>
+        <source src="https://motionbgs.com/media/7913/guitar-morning-with-takanashi-hoshino.960x540.mp4" type="video/mp4">
+    </video>
+</div>
+<div class="overlay"></div>
+
+<div class="container">
+    <!-- ĐÃ SỬA: Quay lại về index.html -->
+    <a href="index.html" class="back-link">
+        <i class="fas fa-arrow-left"></i> Quay lại
+    </a>
+    
+    <div class="glass-card">
+        <div class="transfer-layout">
+            <!-- Cột TRÁI -->
+            <div class="left-col">
+                <div class="qr-header">
+                    <h3>QUÉT MÃ QR</h3>
+                    <h2>⚡ SUBSIEURE PAY ⚡</h2>
+                </div>
+                
+                <div class="qr-wrapper">
+                    <img src="https://sf-static.upanhlaylink.com/img/image_202605302dcb0bfef05de57b2ea78dcfc92060e2.jpg" alt="VietQR - Subsieure">
+                </div>
+                
+                <div class="bank-info-item">
+                    <span class="bank-label">Ngân hàng</span>
+                    <span class="bank-value"><strong>MB Bank (Quân đội)</strong></span>
+                </div>
+                <div class="bank-info-item">
+                    <span class="bank-label">Chủ tài khoản</span>
+                    <span class="bank-value"><strong>NGUYEN VINH HOANG</strong></span>
+                </div>
+                <div class="bank-info-item">
+                    <span class="bank-label">Số tài khoản</span>
+                    <span class="bank-value">
+                        <strong>0986.947.309</strong>
+                        <i class="fas fa-copy copy-icon" onclick="copyText('0986947309')"></i>
+                    </span>
+                </div>
+                
+                <div class="note-warning">
+                    <i class="fas fa-exclamation-triangle"></i> Chuyển khoản đúng nội dung bên phải
+                </div>
+            </div>
+            
+            <!-- Cột PHẢI -->
+            <div class="right-col">
+                <div class="section-title">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <h3>Thông tin chuyển khoản</h3>
+                </div>
+                
+                <div class="amount-buttons">
+                    <div class="amount-btn" data-amount="50000">50.000đ</div>
+                    <div class="amount-btn" data-amount="100000">100.000đ</div>
+                    <div class="amount-btn" data-amount="200000">200.000đ</div>
+                    <div class="amount-btn" data-amount="500000">500.000đ</div>
+                    <div class="amount-btn" data-amount="1000000">1.000.000đ</div>
+                    <div class="amount-btn" data-amount="other">Khác</div>
+                </div>
+                
+                <div class="amount-input-wrapper">
+                    <input type="text" id="customAmount" class="amount-input-custom" placeholder="Nhập số tiền (VNĐ)" style="display:none;">
+                </div>
+                
+                <div class="transfer-content-box">
+                    <div class="transfer-label">
+                        <i class="fas fa-edit"></i> Nội dung chuyển khoản BẮT BUỘC
+                    </div>
+                    <div class="transfer-value">
+                        <code id="transferContent">Đang tải...</code>
+                        <i class="fas fa-copy copy-icon" onclick="copyText(document.getElementById('transferContent').innerText)"></i>
+                    </div>
+                </div>
+                
+                <button class="btn-zalo" id="zaloBtn">
+                    <i class="fab fa-zalo"></i> Liên hệ Admin qua Zalo để cộng tiền
+                </button>
+                
+                <div class="info-note">
+                    <i class="fas fa-clock"></i> Sau khi chuyển khoản, vui lòng liên hệ Admin qua Zalo để được cộng tiền vào ví.
+                    <br><small>📞 Zalo: 0986.947.309</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script>
+    let currentUser = null;
+    let selectedAmount = 0;
+    let isOtherSelected = false;
+
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+            Swal.fire({
+                title: 'Chưa đăng nhập',
+                text: 'Vui lòng đăng nhập để nạp tiền',
+                icon: 'warning',
+                confirmButtonText: 'Đăng nhập ngay',
+                background: '#121218',
+                color: '#fff',
+                confirmButtonColor: '#00f5ff'
+            }).then(() => {
+                window.location.href = 'login.html';
+            });
+            return;
+        }
+        currentUser = user;
+        updateTransferContent();
+    });
+
+    // Format số tiền có dấu phẩy
+    function formatNumberWithCommas(number) {
+        return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    // Xử lý chọn số tiền
+    document.querySelectorAll('.amount-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const amountValue = btn.dataset.amount;
+            const customInput = document.getElementById('customAmount');
+            
+            if (amountValue === 'other') {
+                isOtherSelected = true;
+                customInput.style.display = 'block';
+                customInput.value = '';
+                customInput.focus();
+                selectedAmount = 0;
+                updateTransferContent();
+            } else {
+                isOtherSelected = false;
+                customInput.style.display = 'none';
+                selectedAmount = parseInt(amountValue);
+                updateTransferContent();
+            }
+        });
+    });
+
+    // Xử lý nhập số tiền tùy chỉnh - định dạng có dấu phẩy
+    const customInput = document.getElementById('customAmount');
+    
+    customInput.addEventListener('input', function(e) {
+        let rawValue = this.value.replace(/,/g, '');
+        let numberValue = parseInt(rawValue);
+        
+        if (!isNaN(numberValue) && numberValue > 0) {
+            selectedAmount = numberValue;
+            this.value = formatNumberWithCommas(numberValue);
+        } else {
+            selectedAmount = 0;
+            this.value = '';
+        }
+        updateTransferContent();
+    });
+
+    // Cập nhật nội dung chuyển khoản
+    function updateTransferContent() {
+        if (!currentUser) return;
+        const username = currentUser.email.split('@')[0];
+        const amount = selectedAmount;
+        
+        if (amount > 0) {
+            // Xóa dấu phẩy khi tạo nội dung chuyển khoản
+            const rawAmount = amount.toString().replace(/,/g, '');
+            document.getElementById('transferContent').innerHTML = `${username} ${rawAmount} chuyentien`;
+        } else {
+            if (isOtherSelected) {
+                document.getElementById('transferContent').innerHTML = `${username} [NHAP_SOTIEN] chuyentien`;
+            } else {
+                document.getElementById('transferContent').innerHTML = `${username} [SOTIEN] chuyentien`;
+            }
+        }
+    }
+
+    // Copy text
+    window.copyText = function(text) {
+        navigator.clipboard.writeText(text);
+        Swal.fire({
+            title: 'Đã sao chép!',
+            text: text,
+            icon: 'success',
+            timer: 1500,
+            showConfirmButton: false,
+            background: '#121218',
+            color: '#fff'
+        });
+    };
+
+    // Zalo
+    document.getElementById('zaloBtn').addEventListener('click', () => {
+        window.open('https://zalo.me/0986947309', '_blank');
+    });
+</script>
+</body>
+</html>
