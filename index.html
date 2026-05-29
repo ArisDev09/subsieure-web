@@ -167,7 +167,7 @@
         .balance-badge { background: rgba(0,245,255,0.1); padding: 8px 16px; border-radius: 40px; font-size: 14px; transition: all 0.3s; }
         .balance-badge:hover { background: rgba(0,245,255,0.2); transform: scale(1.02); }
         .balance-badge i { color: #00f5ff; margin-right: 8px; }
-        .btn-recharge { background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 8px 16px; border-radius: 40px; color: white; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .btn-recharge { background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 8px 16px; border-radius: 40px; color: white; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
         .btn-recharge:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(16,185,129,0.4); }
         .user-menu { position: relative; }
         .user-avatar { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px 16px; background: rgba(255,255,255,0.05); border-radius: 40px; transition: all 0.3s; }
@@ -448,10 +448,13 @@
             margin-bottom: 16px;
         }
         .tool-price-slider span { font-size: 12px; color: var(--text-muted); }
-        .btn-action-slider {
+        .btn-buy-slider {
             width: 100%;
             padding: 12px;
+            background: var(--gradient-1);
+            border: none;
             border-radius: 40px;
+            color: #000;
             font-weight: 600;
             font-size: 14px;
             cursor: pointer;
@@ -460,24 +463,10 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            border: none;
-        }
-        .btn-buy-slider {
-            background: var(--gradient-1);
-            color: #000;
         }
         .btn-buy-slider:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,245,255,0.4);
-        }
-        .btn-view-slider {
-            background: rgba(0,245,255,0.15);
-            color: #00f5ff;
-            border: 1px solid rgba(0,245,255,0.3);
-        }
-        .btn-view-slider:hover {
-            background: rgba(0,245,255,0.3);
-            transform: translateY(-2px);
         }
         
         .loading-wrapper {
@@ -561,6 +550,12 @@
         .contact-stat i { font-size: 48px; color: #00f5ff; margin-bottom: 16px; display: block; }
         .contact-stat h4 { font-size: 32px; font-weight: 800; color: #00f5ff; margin-bottom: 8px; }
         .contact-stat p { font-size: 14px; color: var(--text-muted); }
+        
+        .recharge-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(20px); z-index: 3000; align-items: center; justify-content: center; }
+        .recharge-modal.active { display: flex; }
+        .recharge-card { background: linear-gradient(135deg, #0f0f1a, #0a0a0f); border: 1px solid rgba(0,245,255,0.3); border-radius: 48px; padding: 48px; max-width: 480px; width: 90%; text-align: center; position: relative; }
+        .close-recharge { position: absolute; top: 20px; right: 24px; background: none; border: none; color: #888; font-size: 28px; cursor: pointer; }
+        .close-recharge:hover { color: #ef4444; }
         
         .edit-tool-modal {
             display: none;
@@ -709,6 +704,7 @@
         @media (max-width: 480px) {
             .hero-title { font-size: 28px; }
             .hero-stat-number { font-size: 24px; }
+            .recharge-card { padding: 32px 24px; }
             .tool-card-slider { flex: 0 0 100%; min-width: 100%; }
             .auth-buttons { display: none; }
         }
@@ -739,7 +735,7 @@
             <div id="userInfo" style="display: none;">
                 <div class="balance-wrapper">
                     <div class="balance-badge"><i class="fas fa-coins"></i><span id="userBalance">0</span>đ</div>
-                    <a href="chuyentien.html" class="btn-recharge"><i class="fas fa-plus-circle"></i> Nạp tiền</a>
+                    <button class="btn-recharge" id="showRechargeModal"><i class="fas fa-plus-circle"></i> Nạp tiền</button>
                 </div>
                 <div class="user-menu">
                     <div class="user-avatar"><i class="fas fa-user-circle"></i><span id="userEmailShort"></span><i class="fas fa-chevron-down"></i></div>
@@ -924,6 +920,20 @@
     </div>
 </footer>
 
+<div id="rechargeModal" class="recharge-modal">
+    <div class="recharge-card">
+        <button class="close-recharge" id="closeRechargeModal">&times;</button>
+        <div style="width:80px;height:80px;background:linear-gradient(135deg,rgba(0,245,255,0.2),rgba(16,185,129,0.2));border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;border:1px solid rgba(0,245,255,0.3);"><i class="fas fa-coins" style="font-size:40px;color:#00f5ff;"></i></div>
+        <h2 style="font-family:'Space Grotesk';font-size:28px;font-weight:700;background:linear-gradient(135deg,#00f5ff,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">⚡ NẠP TIỀN VÍ ⚡</h2>
+        <p style="color:#a0a0b0;margin:24px 0;">Vui lòng liên hệ với Admin để được tư vấn chi tiết về cách nạp tiền và nhận ưu đãi hấp dẫn!</p>
+        <div style="display:flex;justify-content:center;gap:24px;margin-bottom:32px;">
+            <a href="https://zalo.me/0986947309" target="_blank" style="width:64px;height:64px;background:rgba(255,255,255,0.03);border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.1);"><img src="https://cdn.haitrieu.com/wp-content/uploads/2022/01/Logo-Zalo-Arc.png" alt="Zalo" style="height:32px;width:auto;"></a>
+            <a href="https://www.facebook.com/nguyenvinhcypher09/" target="_blank" id="fbRechargeLink" style="width:64px;height:64px;background:rgba(255,255,255,0.03);border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.1);"><i class="fab fa-facebook-f" style="font-size:28px;color:#1877f2;"></i></a>
+        </div>
+        <div style="font-size:13px;color:#666;border-top:1px solid rgba(255,255,255,0.05);padding-top:24px;"><i class="fas fa-headset"></i> Hỗ trợ 24/7 - Phản hồi nhanh chóng</div>
+    </div>
+</div>
+
 <div id="editToolModal" class="edit-tool-modal">
     <div class="edit-tool-card">
         <h3><i class="fas fa-edit"></i> Chỉnh sửa tool</h3>
@@ -950,7 +960,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
-<script src="js/loading.js"></script>
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyDyLM8PdOKwpzXu-SHV3YAzU28gL2QE4KY",
@@ -975,7 +984,6 @@
     let slidesPerView = 4;
     let maxSlideIndex = 0;
     let isAdmin = false;
-    let purchasedToolIds = [];
     
     const cursorGlow = document.getElementById('cursorGlow');
     document.addEventListener('mousemove', (e) => {
@@ -1004,29 +1012,6 @@
         updateSlidesPerView();
     });
     
-    async function loadPurchasedTools() {
-        if (!currentUser) {
-            purchasedToolIds = [];
-            return;
-        }
-        try {
-            const snapshot = await db.collection('transactions')
-                .where('userId', '==', currentUser.uid)
-                .where('type', '==', 'purchase')
-                .get();
-            purchasedToolIds = [];
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                if (data.toolId) {
-                    purchasedToolIds.push(data.toolId);
-                }
-            });
-            renderSlider();
-        } catch (error) {
-            console.error("Lỗi load purchased tools:", error);
-        }
-    }
-    
     function renderSlider() {
         const track = document.getElementById('toolsSliderTrack');
         if (!track) return;
@@ -1039,13 +1024,7 @@
         const startIndex = currentSlideIndex * slidesPerView;
         const visibleTools = allTools.slice(startIndex, startIndex + slidesPerView);
         
-        track.innerHTML = visibleTools.map((tool) => {
-            const isPurchased = purchasedToolIds.includes(tool.id);
-            const buttonHtml = isPurchased 
-                ? `<a href="products.html?id=${tool.id}" class="btn-action-slider btn-view-slider"><i class="fas fa-eye"></i> Xem ngay</a>`
-                : `<button class="btn-action-slider btn-buy-slider" onclick="event.stopPropagation(); buyTool('${tool.id}', '${escapeHtml(tool.name)}', ${tool.price})"><i class="fas fa-shopping-cart"></i> Mua ngay</button>`;
-            
-            return `
+        track.innerHTML = visibleTools.map((tool) => `
             <div class="tool-card-slider">
                 <div class="tool-image-wrapper-slider">
                     <a href="products.html?id=${tool.id}" style="text-decoration: none; display: block;">
@@ -1063,10 +1042,12 @@
                     <h3 class="tool-name-slider"><a href="products.html?id=${tool.id}">${escapeHtml(tool.name)}</a></h3>
                     <p class="tool-desc-slider">${escapeHtml((tool.shortDescription || tool.description || '').substring(0, 80))}...</p>
                     <div class="tool-price-slider">${tool.price === 0 ? 'Free' : formatPrice(tool.price) + '<span>đ</span>'}</div>
-                    ${buttonHtml}
+                    <button class="btn-buy-slider" onclick="event.stopPropagation(); buyTool('${tool.id}', '${escapeHtml(tool.name)}', ${tool.price})">
+                        <i class="fas fa-shopping-cart"></i> Mua ngay
+                    </button>
                 </div>
             </div>
-        `}).join('');
+        `).join('');
     }
     
     function updateSliderButtons() {
@@ -1120,12 +1101,9 @@
                     document.getElementById('userBalance').innerText = userBalance.toLocaleString('vi-VN');
                 }
             } catch(e) { console.error("Lỗi lấy user:", e); }
-            
-            await loadPurchasedTools();
         } else {
             currentUser = null;
             isAdmin = false;
-            purchasedToolIds = [];
             document.getElementById('authButtons').style.display = 'flex';
             document.getElementById('userInfo').style.display = 'none';
             document.getElementById('adminLink').style.display = 'none';
@@ -1187,7 +1165,7 @@
                 cancelButtonColor: '#ef4444'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = 'chuyentien.html';
+                    openRechargeModal();
                 }
             });
             return;
@@ -1210,22 +1188,6 @@
                     try {
                         const toolDoc = await db.collection('tools').doc(id).get();
                         const link = toolDoc.data().downloadLink || '#';
-                        
-                        await db.collection('transactions').add({
-                            userId: currentUser.uid,
-                            userEmail: currentUser.email,
-                            toolId: id,
-                            toolName: name,
-                            amount: 0,
-                            type: 'purchase',
-                            status: 'success',
-                            downloadLink: link,
-                            createdAt: new Date()
-                        });
-                        
-                        purchasedToolIds.push(id);
-                        renderSlider();
-                        
                         Swal.fire({
                             title: 'Tải thành công!',
                             text: `Tool "${name}" đã sẵn sàng để tải.`,
@@ -1291,8 +1253,6 @@
                     
                     userBalance -= price;
                     document.getElementById('userBalance').innerText = userBalance.toLocaleString('vi-VN');
-                    purchasedToolIds.push(id);
-                    renderSlider();
                     
                     Swal.fire({
                         title: 'Mua thành công!',
@@ -1319,7 +1279,7 @@
                             background: '#121218',
                             color: '#fff',
                             confirmButtonColor: '#10b981'
-                        }).then(() => { window.location.href = 'chuyentien.html'; });
+                        }).then(() => { openRechargeModal(); });
                     } else {
                         Swal.fire({ title: 'Lỗi', text: e.message, icon: 'error', background: '#121218', color: '#fff', confirmButtonColor: '#00f5ff' });
                     }
@@ -1369,7 +1329,6 @@
                         timer: 1500
                     });
                     await loadTools();
-                    if (currentUser) await loadPurchasedTools();
                 } catch (error) {
                     Swal.fire({
                         title: 'Lỗi!',
@@ -1427,6 +1386,13 @@
         document.getElementById('editToolModal').classList.remove('active');
         document.body.style.overflow = '';
     });
+    
+    const rechargeModal = document.getElementById('rechargeModal');
+    function openRechargeModal() { rechargeModal.classList.add('active'); document.body.style.overflow = 'hidden'; }
+    function closeRechargeModalFunc() { rechargeModal.classList.remove('active'); document.body.style.overflow = ''; }
+    document.getElementById('showRechargeModal')?.addEventListener('click', openRechargeModal);
+    document.getElementById('closeRechargeModal')?.addEventListener('click', closeRechargeModalFunc);
+    window.addEventListener('click', (e) => { if(e.target === rechargeModal) closeRechargeModalFunc(); });
     
     document.getElementById('logoutBtn')?.addEventListener('click', async() => { await auth.signOut(); window.location.reload(); });
     
