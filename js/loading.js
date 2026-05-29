@@ -1,151 +1,304 @@
-// js/loading.js — Cyberpunk Loading Manager
-(function () {
-  let overlay = null, timeout = null;
+// js/loading.js - Loading Manager (Hiệu ứng chữ chạy + logo xoay)
+(function() {
+    let loadingOverlay = null;
+    let loadingTimeout = null;
+    let currentTextIndex = 0;
+    let textInterval = null;
+    
+    const loadingTexts = [
+        "GIẢI PHÁP CÔNG NGHỆ",
+        "ĐỘT PHÁ & TOÀN DIỆN",
+        "SUBSIEURE - TOOL CHẤT LƯ�ỢNG",
+        "BẢO MẬT TUYỆT ĐỐI",
+        "HỖ TRỢ 24/7"
+    ];
 
-  function inject() {
-    if (overlay) return;
+    function createLoadingOverlay() {
+        if (loadingOverlay) return;
+        
+        loadingOverlay = document.createElement('div');
+        loadingOverlay.id = 'global-loading-overlay';
+        loadingOverlay.innerHTML = `
+            <div class="loading-overlay-content">
+                <div class="loading-logo">
+                    <div class="logo-ring">
+                        <div class="ring"></div>
+                        <div class="ring"></div>
+                        <div class="ring"></div>
+                        <div class="logo-center">
+                            <span>S</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="loading-text-container">
+                    <div class="loading-main-text" id="loadingMainText">GIẢI PHÁP CÔNG NGHỆ</div>
+                    <div class="loading-sub-text" id="loadingSubText">ĐỘT PHÁ & TOÀN DIỆN</div>
+                </div>
+                <div class="loading-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="loading-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        loadingOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a, #050510);
+            z-index: 10000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        `;
+        document.body.appendChild(loadingOverlay);
+        
+        const style = document.createElement('style');
+        style.textContent = `
+            .loading-overlay-content {
+                text-align: center;
+                animation: fadeInScale 0.4s ease-out;
+            }
+            
+            /* Logo Ring */
+            .loading-logo {
+                margin-bottom: 40px;
+            }
+            .logo-ring {
+                position: relative;
+                width: 100px;
+                height: 100px;
+                margin: 0 auto;
+            }
+            .ring {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                border: 2px solid transparent;
+                animation: spinRing 2s linear infinite;
+            }
+            .ring:nth-child(1) {
+                border-top-color: #00f5ff;
+                border-right-color: #00f5ff;
+                animation-duration: 1s;
+            }
+            .ring:nth-child(2) {
+                width: 75%;
+                height: 75%;
+                top: 12.5%;
+                left: 12.5%;
+                border-bottom-color: #ff6b6b;
+                border-left-color: #ff6b6b;
+                animation-duration: 1.5s;
+                animation-direction: reverse;
+            }
+            .ring:nth-child(3) {
+                width: 50%;
+                height: 50%;
+                top: 25%;
+                left: 25%;
+                border-top-color: #ffd700;
+                border-right-color: #ffd700;
+                animation-duration: 0.8s;
+            }
+            .logo-center {
+                position: absolute;
+                width: 40%;
+                height: 40%;
+                top: 30%;
+                left: 30%;
+                background: linear-gradient(135deg, #00f5ff, #0099cc);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 28px;
+                font-weight: 800;
+                color: #000;
+                box-shadow: 0 0 20px rgba(0,245,255,0.5);
+            }
+            
+            /* Text Animation */
+            .loading-text-container {
+                margin-bottom: 30px;
+            }
+            .loading-main-text {
+                font-size: 28px;
+                font-weight: 800;
+                letter-spacing: 4px;
+                background: linear-gradient(135deg, #00f5ff, #ff6b6b, #ffd700);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-size: 200% 200%;
+                animation: gradientShift 2s ease infinite, textGlow 1.5s ease-in-out infinite;
+                margin-bottom: 12px;
+            }
+            .loading-sub-text {
+                font-size: 16px;
+                letter-spacing: 3px;
+                color: rgba(255,255,255,0.6);
+                font-weight: 500;
+                animation: fadeInOut 2s ease-in-out infinite;
+            }
+            
+            /* Dots */
+            .loading-dots {
+                display: flex;
+                justify-content: center;
+                gap: 12px;
+                margin-bottom: 30px;
+            }
+            .loading-dots span {
+                width: 8px;
+                height: 8px;
+                background: #00f5ff;
+                border-radius: 50%;
+                animation: dotPulse 1.2s ease-in-out infinite;
+            }
+            .loading-dots span:nth-child(1) { animation-delay: 0s; }
+            .loading-dots span:nth-child(2) { animation-delay: 0.15s; }
+            .loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+            .loading-dots span:nth-child(4) { animation-delay: 0.45s; }
+            .loading-dots span:nth-child(5) { animation-delay: 0.6s; }
+            
+            /* Progress Bar */
+            .loading-progress {
+                width: 280px;
+                margin: 0 auto;
+            }
+            .progress-bar {
+                height: 2px;
+                background: rgba(255,255,255,0.1);
+                border-radius: 2px;
+                overflow: hidden;
+            }
+            .progress-fill {
+                width: 0%;
+                height: 100%;
+                background: linear-gradient(90deg, #00f5ff, #ff6b6b, #ffd700, #00f5ff);
+                background-size: 200% 100%;
+                border-radius: 2px;
+                animation: progressFill 2s ease-out forwards, gradientShift 1s linear infinite;
+            }
+            
+            /* Animations */
+            @keyframes spinRing {
+                to { transform: rotate(360deg); }
+            }
+            @keyframes gradientShift {
+                0% { background-position: 0% 50%; }
+                100% { background-position: 200% 50%; }
+            }
+            @keyframes textGlow {
+                0%, 100% { text-shadow: 0 0 5px rgba(0,245,255,0.3); }
+                50% { text-shadow: 0 0 20px rgba(0,245,255,0.6); }
+            }
+            @keyframes fadeInOut {
+                0%, 100% { opacity: 0.5; }
+                50% { opacity: 1; }
+            }
+            @keyframes dotPulse {
+                0%, 100% { transform: scale(0.5); opacity: 0.3; }
+                50% { transform: scale(1); opacity: 1; }
+            }
+            @keyframes progressFill {
+                0% { width: 0%; }
+                100% { width: 100%; }
+            }
+            @keyframes fadeInScale {
+                from {
+                    opacity: 0;
+                    transform: scale(0.95);
+                }
+                to {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    function startTextRotation() {
+        if (textInterval) clearInterval(textInterval);
+        
+        let textIndex = 0;
+        const mainTextEl = document.getElementById('loadingMainText');
+        const subTextEl = document.getElementById('loadingSubText');
+        
+        textInterval = setInterval(() => {
+            textIndex = (textIndex + 1) % loadingTexts.length;
+            if (mainTextEl) {
+                mainTextEl.style.opacity = '0';
+                mainTextEl.style.transform = 'translateY(10px)';
+                setTimeout(() => {
+                    mainTextEl.textContent = loadingTexts[textIndex];
+                    mainTextEl.style.opacity = '1';
+                    mainTextEl.style.transform = 'translateY(0)';
+                }, 150);
+            }
+            if (subTextEl) {
+                const subTexts = ["SUBSIEURE", "TOOL CHẤT LƯỢNG CAO", "UY TÍN SỐ 1", "BẢO HÀNH TRỌN ĐỜI"];
+                subTextEl.style.opacity = '0';
+                setTimeout(() => {
+                    subTextEl.textContent = subTexts[textIndex % subTexts.length];
+                    subTextEl.style.opacity = '1';
+                }, 150);
+            }
+        }, 2000);
+    }
+    
+    function stopTextRotation() {
+        if (textInterval) {
+            clearInterval(textInterval);
+            textInterval = null;
+        }
+    }
 
-    const style = document.createElement('style');
-    style.textContent = `
-      #cy-loading {
-        position: fixed; inset: 0; z-index: 10000;
-        background: rgba(6, 10, 22, 0.82);
-        backdrop-filter: blur(8px);
-        display: none; flex-direction: column;
-        align-items: center; justify-content: center;
-        font-family: 'Inter', sans-serif;
-      }
-      #cy-loading .cy-content { text-align: center; animation: cyFadeIn .2s ease; }
+    function clearHideTimeout() {
+        if (loadingTimeout) {
+            clearTimeout(loadingTimeout);
+            loadingTimeout = null;
+        }
+    }
 
-      /* hex rings */
-      .cy-rings { position: relative; width: 88px; height: 88px; margin: 0 auto 20px; }
-      .cy-rings svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-      .cy-r1 { animation: cyCW  3s linear infinite; transform-origin: 44px 44px; }
-      .cy-r2 { animation: cyCCW 2s linear infinite; transform-origin: 44px 44px; }
-      .cy-rp { animation: cyPulse 1.5s ease-in-out infinite; transform-origin: 44px 44px; }
-      .cy-dot { animation: cyDot  1.5s ease-in-out infinite; }
-      @keyframes cyCW    { to { transform: rotate(360deg); } }
-      @keyframes cyCCW   { to { transform: rotate(-360deg); } }
-      @keyframes cyPulse { 0%,100%{opacity:.4;transform:scale(1)} 50%{opacity:1;transform:scale(1.08)} }
-      @keyframes cyDot   { 0%,100%{opacity:.5} 50%{opacity:1} }
+    window.showLoading = function(text) {
+        createLoadingOverlay();
+        clearHideTimeout();
+        startTextRotation();
+        loadingOverlay.style.display = 'flex';
+    };
 
-      /* bars */
-      .cy-bars { display: flex; gap: 4px; align-items: flex-end; height: 26px; justify-content: center; margin-bottom: 14px; }
-      .cy-bar  { width: 4px; border-radius: 2px; animation: cyBar 1.1s ease-in-out infinite; }
-      .cy-bar:nth-child(1){height:40%;background:#00f5ff;animation-delay:0s}
-      .cy-bar:nth-child(2){height:70%;background:#4dd9ff;animation-delay:.12s}
-      .cy-bar:nth-child(3){height:100%;background:#00f5ff;animation-delay:.24s}
-      .cy-bar:nth-child(4){height:70%;background:#4dd9ff;animation-delay:.36s}
-      .cy-bar:nth-child(5){height:40%;background:#00f5ff;animation-delay:.48s}
-      .cy-bar:nth-child(6){height:70%;background:#ff2d78;animation-delay:.6s}
-      .cy-bar:nth-child(7){height:100%;background:#ff2d78;animation-delay:.72s}
-      .cy-bar:nth-child(8){height:70%;background:#ff2d78;animation-delay:.84s}
-      @keyframes cyBar { 0%,100%{transform:scaleY(.4);opacity:.5} 50%{transform:scaleY(1);opacity:1} }
+    window.hideLoading = function() {
+        stopTextRotation();
+        clearHideTimeout();
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'none';
+            const progressFill = document.getElementById('progressFill');
+            if (progressFill) progressFill.style.width = '0%';
+        }
+    };
 
-      /* status text */
-      .cy-status { font-size: 10px; letter-spacing: 3px; color: #00f5ff; opacity: .75; margin-bottom: 6px; }
-      .cy-label  { font-size: 13px; letter-spacing: 4px; color: #fff; opacity: .9; margin-bottom: 14px;
-                   display: flex; align-items: center; gap: 2px; justify-content: center; }
-      .cy-dots span { display: inline-block; width: 4px; height: 4px; border-radius: 50%;
-                      margin: 0 2px; animation: cyDotTrail 1.2s ease-in-out infinite; }
-      .cy-dots span:nth-child(1){background:#00f5ff;animation-delay:0s}
-      .cy-dots span:nth-child(2){background:#88eeff;animation-delay:.2s}
-      .cy-dots span:nth-child(3){background:#ff2d78;animation-delay:.4s}
-      @keyframes cyDotTrail { 0%,100%{transform:scale(.4);opacity:.3} 50%{transform:scale(1);opacity:1} }
+    window.autoHideLoading = function(duration, text) {
+        showLoading(text);
+        clearHideTimeout();
+        loadingTimeout = setTimeout(function() {
+            hideLoading();
+        }, duration || 3000);
+    };
 
-      /* progress */
-      .cy-prog { width: 180px; position: relative; }
-      .cy-track { height: 2px; background: rgba(0,245,255,.12); border-radius: 2px; overflow: hidden; }
-      .cy-fill  { height: 100%; background: linear-gradient(90deg,#ff2d78,#00f5ff);
-                  border-radius: 2px; animation: cyProg 2s ease-in-out infinite; }
-      @keyframes cyProg {
-        0%  {width:0%;margin-left:0%;opacity:1}
-        60% {width:60%;margin-left:30%;opacity:1}
-        100%{width:0%;margin-left:100%;opacity:0}
-      }
-
-      /* scanline */
-      .cy-scan { position: fixed; left:0; right:0; height:1px; pointer-events:none;
-                 background: linear-gradient(90deg,transparent,rgba(0,245,255,.2),transparent);
-                 animation: cyScan 4s linear infinite; }
-      @keyframes cyScan { from{top:0} to{top:100vh} }
-
-      /* corners */
-      .cy-corner { position: fixed; width:16px; height:16px; opacity:.4; }
-      .cy-corner.tl{top:16px;left:16px;border-top:1.5px solid #00f5ff;border-left:1.5px solid #00f5ff}
-      .cy-corner.tr{top:16px;right:16px;border-top:1.5px solid #00f5ff;border-right:1.5px solid #00f5ff}
-      .cy-corner.bl{bottom:16px;left:16px;border-bottom:1.5px solid #00f5ff;border-left:1.5px solid #00f5ff}
-      .cy-corner.br{bottom:16px;right:16px;border-bottom:1.5px solid #00f5ff;border-right:1.5px solid #00f5ff}
-
-      @keyframes cyFadeIn { from{opacity:0;transform:scale(.97)} to{opacity:1;transform:scale(1)} }
-    `;
-    document.head.appendChild(style);
-
-    overlay = document.createElement('div');
-    overlay.id = 'cy-loading';
-    overlay.innerHTML = `
-      <div class="cy-corner tl"></div><div class="cy-corner tr"></div>
-      <div class="cy-corner bl"></div><div class="cy-corner br"></div>
-      <div class="cy-scan"></div>
-      <div class="cy-content">
-        <div class="cy-rings">
-          <svg viewBox="0 0 88 88" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g class="cy-r1">
-              <circle cx="44" cy="44" r="37" stroke="rgba(0,245,255,.12)" stroke-width="1"/>
-              <circle cx="44" cy="44" r="37" stroke="#00f5ff" stroke-width="1.5"
-                stroke-dasharray="22 11 8 58" stroke-linecap="round"/>
-            </g>
-            <g class="cy-r2">
-              <circle cx="44" cy="44" r="27" stroke="rgba(255,45,120,.12)" stroke-width="1"/>
-              <circle cx="44" cy="44" r="27" stroke="#ff2d78" stroke-width="1.5"
-                stroke-dasharray="15 8 5 44" stroke-linecap="round"/>
-            </g>
-            <g class="cy-rp">
-              <polygon points="44,21 62,32 62,54 44,65 26,54 26,32"
-                stroke="rgba(240,192,64,.35)" stroke-width="1" fill="none"/>
-            </g>
-            <circle class="cy-dot" cx="44" cy="44" r="4" fill="#00f5ff"/>
-            <circle cx="44" cy="44" r="2" fill="#fff" opacity=".9"/>
-          </svg>
-        </div>
-        <div class="cy-bars">
-          <div class="cy-bar"></div><div class="cy-bar"></div><div class="cy-bar"></div>
-          <div class="cy-bar"></div><div class="cy-bar"></div><div class="cy-bar"></div>
-          <div class="cy-bar"></div><div class="cy-bar"></div>
-        </div>
-        <div class="cy-status" id="cyStatus">KHỞI TẠO HỆ THỐNG</div>
-        <div class="cy-label">
-          <span id="cyLabel">ĐANG TẢI</span>
-          <span class="cy-dots"><span></span><span></span><span></span></span>
-        </div>
-        <div class="cy-prog">
-          <div class="cy-track"><div class="cy-fill"></div></div>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(overlay);
-  }
-
-  function clearT() { if (timeout) { clearTimeout(timeout); timeout = null; } }
-
-  window.showLoading = function (text, status) {
-    inject(); clearT();
-    document.getElementById('cyLabel').textContent  = text   || 'ĐANG TẢI';
-    document.getElementById('cyStatus').textContent = status || 'KHỞI TẠO HỆ THỐNG';
-    overlay.style.display = 'flex';
-  };
-
-  window.hideLoading = function () {
-    clearT();
-    if (overlay) overlay.style.display = 'none';
-  };
-
-  window.autoHideLoading = function (duration, text, status) {
-    showLoading(text, status); clearT();
-    timeout = setTimeout(hideLoading, duration || 2000);
-  };
-
-  document.addEventListener('DOMContentLoaded', function () {
-    autoHideLoading(2000, 'ĐANG TẢI', 'KHỞI TẠO HỆ THỐNG');
-  });
+    window.addEventListener('DOMContentLoaded', function() {
+        autoHideLoading(3000);
+    });
 })();
