@@ -194,22 +194,30 @@
         }
         .lang-badge:hover { background: rgba(0,245,255,0.3); transform: translateY(-2px); }
         .product-price { font-size: 32px; font-weight: 800; color: #00f5ff; margin: 20px 0; }
-        .btn-buy {
+        .btn-buy, .btn-download-product {
             display: block;
             width: 100%;
             padding: 16px;
-            background: linear-gradient(135deg, #00f5ff, #0099cc);
-            border: none;
             border-radius: 48px;
-            color: #000;
             font-size: 18px;
             font-weight: 700;
             cursor: pointer;
             text-align: center;
             text-decoration: none;
             transition: all 0.3s;
+            border: none;
+        }
+        .btn-buy {
+            background: linear-gradient(135deg, #00f5ff, #0099cc);
+            color: #000;
         }
         .btn-buy:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,245,255,0.4); }
+        .btn-download-product {
+            background: rgba(0,245,255,0.15);
+            color: #00f5ff;
+            border: 1px solid rgba(0,245,255,0.3);
+        }
+        .btn-download-product:hover { background: rgba(0,245,255,0.3); transform: translateY(-3px); }
         .warning-box {
             background: rgba(255,107,107,0.1);
             border-left: 4px solid #ff6b6b;
@@ -303,7 +311,7 @@
     </style>
 </head>
 <body>
-
+<script src="js/loading.js"></script>
 <div class="cursor-glow" id="cursorGlow"></div>
 
 <nav class="navbar" id="navbar">
@@ -343,6 +351,8 @@
     let allImages = [];
     let currentUser = null;
     let userBalance = 0;
+    let isPurchased = false;
+    let downloadLink = '#';
 
     function getToolId() {
         const params = new URLSearchParams(window.location.search);
@@ -399,6 +409,21 @@
         currentImageIndex = index;
     }
 
+    async function checkPurchased(toolId) {
+        if (!currentUser) return false;
+        try {
+            const snapshot = await db.collection('transactions')
+                .where('userId', '==', currentUser.uid)
+                .where('toolId', '==', toolId)
+                .where('type', '==', 'purchase')
+                .get();
+            return !snapshot.empty;
+        } catch (error) {
+            console.error("Lỗi kiểm tra đã mua:", error);
+            return false;
+        }
+    }
+
     auth.onAuthStateChanged(async (user) => {
         if (user) {
             currentUser = user;
@@ -410,7 +435,7 @@
             currentUser = null;
             userBalance = 0;
         }
-        loadProduct();
+        await loadProduct();
     });
 
     async function loadProduct() {
@@ -450,6 +475,9 @@
             }
 
             currentTool = { id: doc.id, ...doc.data() };
+            downloadLink = currentTool.downloadLink || '#';
+            
+            isPurchased = await checkPurchased(toolId);
             
             allImages = [];
             if (currentTool.image && currentTool.image.trim()) {
@@ -491,7 +519,15 @@
         const langIcons = { python: 'fab fa-python', rust: 'fas fa-cog', cpp: 'fas fa-code', html: 'fab fa-html5', js: 'fab fa-js', php: 'fab fa-php', java: 'fab fa-java', go: 'fab fa-golang' };
 
         const priceDisplay = tool.price === 0 ? 'Free' : tool.price.toLocaleString('vi-VN') + 'đ';
-        const buyButtonText = tool.price === 0 ? 'Tải ngay - Free' : `Mua ngay - ${tool.price.toLocaleString('vi-VN')}đ`;
+        
+        let actionButton = '';
+        if (isPurchased) {
+            actionButton = `<a href="${downloadLink}" target="_blank" class="btn-download-product"><i class="fas fa-download"></i> Tải xuống ngay</a>`;
+        } else if (tool.price === 0) {
+            actionButton = `<button class="btn-buy" onclick="buyNow()"><i class="fas fa-download"></i> Tải ngay - Free</button>`;
+        } else {
+            actionButton = `<button class="btn-buy" onclick="buyNow()"><i class="fas fa-shopping-cart"></i> Mua ngay - ${tool.price.toLocaleString('vi-VN')}đ</button>`;
+        }
 
         let sliderHTML = '';
         if (allImages.length === 1) {
@@ -520,7 +556,8 @@
                     </div>
                     <div class="product-price">${priceDisplay}</div>
                     ${tool.warningMessage ? `<div class="warning-box">${tool.warningMessage.split('\n').map(line => `<p><i class="fas fa-exclamation-triangle"></i> ${escapeHtml(line)}</p>`).join('')}</div>` : ''}
-                    <button class="btn-buy" onclick="buyNow()"><i class="fas ${tool.price === 0 ? 'fa-download' : 'fa-shopping-cart'}"></i> ${buyButtonText}</button>
+                    ${actionButton}
+                    ${isPurchased ? '' : `<div style="font-size:12px; color:#666; margin-top:12px; text-align:center;"><i class="fas fa-shield-alt"></i> Bảo hành trọn đời sau khi mua</div>`}
                 </div>
             </div>
             ${tool.videoUrl && videoId ? `
@@ -549,6 +586,22 @@
     window.buyNow = async () => {
         if (!currentTool) return;
         
+        if (isPurchased) {
+            if (downloadLink !== '#') {
+                window.open(downloadLink, '_blank');
+            } else {
+                Swal.fire({
+                    title: 'Liên hệ Admin',
+                    text: 'Vui lòng liên hệ Admin qua Zalo để nhận link tải.',
+                    icon: 'info',
+                    background: '#121218',
+                    color: '#fff',
+                    confirmButtonColor: '#00f5ff'
+                });
+            }
+            return;
+        }
+        
         if (currentTool.price === 0) {
             Swal.fire({
                 title: 'Xác nhận tải tool miễn phí',
@@ -563,26 +616,34 @@
                 cancelButtonColor: '#ef4444'
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    if (currentTool.downloadLink && currentTool.downloadLink !== '#') {
-                        window.open(currentTool.downloadLink, '_blank');
+                    try {
+                        await db.collection('transactions').add({
+                            userId: currentUser.uid,
+                            userEmail: currentUser.email,
+                            toolId: currentTool.id,
+                            toolName: currentTool.name,
+                            amount: 0,
+                            type: 'purchase',
+                            status: 'success',
+                            downloadLink: currentTool.downloadLink || '#',
+                            createdAt: new Date()
+                        });
+                        isPurchased = true;
+                        renderProduct();
+                        if (currentTool.downloadLink && currentTool.downloadLink !== '#') {
+                            window.open(currentTool.downloadLink, '_blank');
+                        }
                         Swal.fire({
                             title: 'Thành công!',
-                            text: 'Tool đang được tải xuống.',
+                            text: 'Tool đã được thêm vào thư viện của bạn.',
                             icon: 'success',
                             background: '#121218',
                             color: '#fff',
                             confirmButtonColor: '#00f5ff',
                             timer: 1500
                         });
-                    } else {
-                        Swal.fire({
-                            title: 'Liên hệ Admin',
-                            text: 'Tool này miễn phí! Vui lòng liên hệ Admin qua Zalo để nhận link tải.',
-                            icon: 'info',
-                            background: '#121218',
-                            color: '#fff',
-                            confirmButtonColor: '#00f5ff'
-                        });
+                    } catch(e) {
+                        Swal.fire({ title: 'Lỗi', text: e.message, icon: 'error', background: '#121218', color: '#fff', confirmButtonColor: '#00f5ff' });
                     }
                 }
             });
@@ -623,7 +684,7 @@
                 cancelButtonColor: '#ef4444'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    document.getElementById('showRechargeModal')?.click();
+                    window.location.href = 'chuyentien.html';
                 }
             });
             return;
@@ -673,6 +734,8 @@
                     });
                     
                     userBalance -= currentTool.price;
+                    isPurchased = true;
+                    renderProduct();
                     
                     Swal.fire({
                         title: 'Mua thành công!',
@@ -698,7 +761,7 @@
                             background: '#121218',
                             color: '#fff',
                             confirmButtonColor: '#10b981'
-                        });
+                        }).then(() => { window.location.href = 'chuyentien.html'; });
                     } else {
                         Swal.fire({
                             title: 'Lỗi',
