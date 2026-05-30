@@ -261,7 +261,9 @@
             </div>
             <div class="table-wrapper">
                 <table class="admin-table">
-                    <thead><tr><th>Ảnh</th><th>Tên</th><th>Mô tả</th><th>Giá</th><th>Link tải</th><th>Thao tác</th></tr></thead>
+                    <thead>
+                        <tr><th>Ảnh</th><th>Tên</th><th>Mô tả</th><th>Giá</th><th>Link tải</th><th>Thao tác</th></tr>
+                    </thead>
                     <tbody id="toolsTable"><tr><td colspan="6" style="text-align:center">Đang tải...</td></tr></tbody>
                 </table>
             </div>
@@ -271,7 +273,9 @@
             <div class="page-header"><h2>Quản lý User</h2></div>
             <div class="table-wrapper">
                 <table class="admin-table">
-                    <thead><tr><th>Email</th><th>Số dư</th><th>Vai trò</th><th>Thao tác</th></tr></thead>
+                    <thead>
+                        <tr><th>Email</th><th>Số dư</th><th>Vai trò</th><th>Thao tác</th></tr>
+                    </thead>
                     <tbody id="usersTable"><tr><td colspan="4" style="text-align:center">Đang tải...</td></tr></tbody>
                 </table>
             </div>
@@ -281,7 +285,9 @@
             <div class="page-header"><h2>Lịch sử giao dịch</h2></div>
             <div class="table-wrapper">
                 <table class="admin-table">
-                    <thead><tr><th>Người dùng</th><th>Sản phẩm</th><th>Số tiền</th><th>Loại</th><th>Thời gian</th></tr></thead>
+                    <thead>
+                        <tr><th>Người dùng</th><th>Sản phẩm</th><th>Số tiền</th><th>Loại</th><th>Thời gian</th></tr>
+                    </thead>
                     <tbody id="transactionsTable"><tr><td colspan="5" style="text-align:center">Đang tải...</td></tr></tbody>
                 </table>
             </div>
@@ -324,264 +330,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 <script src="js/firebase-config.js"></script>
-<script>
-    let allTools = [], allUsers = [], allTransactions = [];
-    let revenueChart = null;
-    let currentChartRange = '7';
-
-    function showAlert(msg, isError = false) {
-        const alertDiv = document.getElementById('alert');
-        alertDiv.textContent = msg;
-        alertDiv.className = 'alert' + (isError ? ' error' : '');
-        alertDiv.style.display = 'block';
-        setTimeout(() => alertDiv.style.display = 'none', 3000);
-    }
-
-    function formatPrice(p) { return (p || 0).toLocaleString('vi-VN'); }
-    function escapeHtml(s) { if (!s) return ''; return s.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
-
-    // Check auth
-    auth.onAuthStateChanged(async (user) => {
-        if (!user) {
-            window.location.href = 'login.html';
-            return;
-        }
-        if (user.email !== 'nguyenvinhhoang209@gmail.com') {
-            alert('Bạn không có quyền truy cập!');
-            window.location.href = 'index.html';
-            return;
-        }
-        document.getElementById('adminEmail').innerText = user.email;
-        await Promise.all([loadTools(), loadUsers(), loadTransactions()]);
-        updateStats();
-        updateChart('7');
-    });
-
-    async function loadTools() {
-        try {
-            const snapshot = await db.collection('tools').get();
-            allTools = [];
-            snapshot.forEach(doc => allTools.push({ id: doc.id, ...doc.data() }));
-            const tbody = document.getElementById('toolsTable');
-            if (allTools.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Chưa có tool nào</td></tr>';
-                return;
-            }
-            tbody.innerHTML = allTools.map(tool => `
-                <tr>
-                    <td><img src="${tool.image || 'https://placehold.co/60'}" onerror="this.src='https://placehold.co/60'"></td>
-                    <td><strong>${escapeHtml(tool.name)}</strong></td>
-                    <td>${escapeHtml((tool.description || '').substring(0, 50))}...</td>
-                    <td style="color:#00f5ff">${formatPrice(tool.price)}đ</td>
-                    <td><a href="${tool.downloadLink || '#'}" target="_blank" style="color:#00f5ff">Link</a></td>
-                    <td>
-                        <button class="btn-edit" onclick="editTool('${tool.id}')">Sửa</button>
-                        <button class="btn-delete" onclick="deleteTool('${tool.id}')">Xóa</button>
-                    </td>
-                </tr>
-            `).join('');
-        } catch (error) {
-            showAlert('Lỗi tải tool: ' + error.message, true);
-        }
-    }
-
-    async function loadUsers() {
-        try {
-            const snapshot = await db.collection('users').get();
-            allUsers = [];
-            snapshot.forEach(doc => allUsers.push({ id: doc.id, ...doc.data() }));
-            const tbody = document.getElementById('usersTable');
-            if (allUsers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">Chưa có user</td></tr>';
-                return;
-            }
-            tbody.innerHTML = allUsers.filter(u => u.role !== 'admin').map(user => `
-                <tr>
-                    <td>${escapeHtml(user.email)}</td>
-                    <td style="color:#00f5ff">${formatPrice(user.balance || 0)}đ</td>
-                    <td><span style="background:rgba(0,245,255,0.1);padding:4px 12px;border-radius:20px;">User</span></td>
-                    <td><button class="btn-deposit" onclick="openDeposit('${user.id}', '${escapeHtml(user.email)}')">Nạp tiền</button></td>
-                </tr>
-            `).join('');
-        } catch (error) {
-            showAlert('Lỗi tải user: ' + error.message, true);
-        }
-    }
-
-    async function loadTransactions() {
-        try {
-            const snapshot = await db.collection('transactions').orderBy('createdAt', 'desc').get();
-            allTransactions = [];
-            snapshot.forEach(doc => allTransactions.push(doc.data()));
-            const tbody = document.getElementById('transactionsTable');
-            if (allTransactions.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Chưa có giao dịch</td></tr>';
-                return;
-            }
-            tbody.innerHTML = allTransactions.map(t => `
-                <tr>
-                    <td>${escapeHtml(t.userEmail || 'N/A')}</td>
-                    <td>${escapeHtml(t.toolName || 'Nạp tiền')}</td>
-                    <td style="color:${t.type === 'purchase' ? '#ef4444' : '#10b981'}">${t.type === 'purchase' ? '-' : '+'}${formatPrice(t.amount)}đ</td>
-                    <td><span style="background:${t.type === 'purchase' ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)'};padding:4px 12px;border-radius:20px;">${t.type === 'purchase' ? 'Mua tool' : 'Nạp tiền'}</span></td>
-                    <td>${t.createdAt?.toDate().toLocaleString('vi-VN') || 'N/A'}</td>
-                </tr>
-            `).join('');
-        } catch (error) {
-            showAlert('Lỗi tải giao dịch: ' + error.message, true);
-        }
-    }
-
-    function updateStats() {
-        document.getElementById('totalTools').innerText = allTools.length;
-        document.getElementById('totalUsers').innerText = allUsers.filter(u => u.role !== 'admin').length;
-        const purchases = allTransactions.filter(t => t.type === 'purchase');
-        document.getElementById('totalOrders').innerText = purchases.length;
-        const revenue = purchases.reduce((s, t) => s + (t.amount || 0), 0);
-        document.getElementById('totalRevenue').innerText = formatPrice(revenue) + 'đ';
-    }
-
-    function updateChart(days) {
-        let labels = [], amounts = [];
-        const now = new Date();
-        if (days === '365') {
-            for (let i = 11; i >= 0; i--) {
-                const month = now.getMonth() - i;
-                const year = now.getFullYear() + Math.floor(month / 12);
-                const actualMonth = ((month % 12) + 12) % 12;
-                const monthNames = ['Thg 1', 'Thg 2', 'Thg 3', 'Thg 4', 'Thg 5', 'Thg 6', 'Thg 7', 'Thg 8', 'Thg 27', 'Thg 10', 'Thg 11', 'Thg 12'];
-                labels.push(`${monthNames[actualMonth]} ${year}`);
-                const amount = allTransactions.filter(t => {
-                    if (t.type !== 'purchase') return false;
-                    const d = t.createdAt?.toDate();
-                    return d && d.getMonth() === actualMonth && d.getFullYear() === year;
-                }).reduce((s, t) => s + (t.amount || 0), 0);
-                amounts.push(amount);
-            }
-        } else {
-            const dayCount = parseInt(days);
-            for (let i = dayCount - 1; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(now.getDate() - i);
-                const dateStr = date.toLocaleDateString('vi-VN');
-                labels.push(dateStr);
-                const amount = allTransactions.filter(t => {
-                    if (t.type !== 'purchase') return false;
-                    const d = t.createdAt?.toDate();
-                    return d && d.toLocaleDateString('vi-VN') === dateStr;
-                }).reduce((s, t) => s + (t.amount || 0), 0);
-                amounts.push(amount);
-            }
-        }
-        const ctx = document.getElementById('revenueChart').getContext('2d');
-        if (revenueChart) revenueChart.destroy();
-        revenueChart = new Chart(ctx, {
-            type: 'line',
-            data: { labels, datasets: [{ label: 'Doanh thu (VNĐ)', data: amounts, borderColor: '#00f5ff', backgroundColor: 'rgba(0,245,255,0.1)', borderWidth: 2, fill: true, tension: 0.3, pointBackgroundColor: '#00f5ff', pointBorderColor: '#fff', pointRadius: 4 }] },
-            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { labels: { color: '#fff' } }, tooltip: { callbacks: { label: (ctx) => `${formatPrice(ctx.raw)}đ` } } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#fff', callback: (v) => formatPrice(v) + 'đ' } }, x: { ticks: { color: '#aaa', maxRotation: 45 } } } }
-        });
-    }
-
-    document.querySelectorAll('.chart-time-btn').forEach(btn => {
-        btn.onclick = () => {
-            document.querySelectorAll('.chart-time-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentChartRange = btn.dataset.range;
-            updateChart(currentChartRange);
-        };
-    });
-
-    window.editTool = (id) => {
-        const tool = allTools.find(t => t.id === id);
-        if (tool) {
-            document.getElementById('modalTitle').innerText = 'Sửa tool';
-            document.getElementById('toolId').value = tool.id;
-            document.getElementById('toolName').value = tool.name;
-            document.getElementById('toolDesc').value = tool.description || '';
-            document.getElementById('toolPrice').value = tool.price;
-            document.getElementById('toolImage').value = tool.image || '';
-            document.getElementById('toolDownloadLink').value = tool.downloadLink || '';
-            document.getElementById('toolCategory').value = tool.category || 'seo';
-            document.getElementById('toolModal').classList.add('active');
-        }
-    };
-
-    window.deleteTool = async (id) => {
-        if (confirm('Xóa tool này?')) {
-            await db.collection('tools').doc(id).delete();
-            showAlert('✅ Xóa thành công!');
-            loadTools();
-            updateStats();
-        }
-    };
-
-    window.openDeposit = (uid, email) => {
-        document.getElementById('depositUserId').value = uid;
-        document.getElementById('depositUserEmail').value = email;
-        document.getElementById('depositModal').classList.add('active');
-    };
-
-    document.getElementById('saveToolBtn').onclick = async () => {
-        const id = document.getElementById('toolId').value;
-        const data = {
-            name: document.getElementById('toolName').value,
-            description: document.getElementById('toolDesc').value,
-            price: parseInt(document.getElementById('toolPrice').value),
-            image: document.getElementById('toolImage').value,
-            downloadLink: document.getElementById('toolDownloadLink').value,
-            category: document.getElementById('toolCategory').value,
-            updatedAt: new Date()
-        };
-        if (!data.name || !data.price) { showAlert('Nhập đủ thông tin!', true); return; }
-        try {
-            if (id) await db.collection('tools').doc(id).update(data);
-            else await db.collection('tools').add(data);
-            showAlert('✅ Thành công!');
-            document.getElementById('toolModal').classList.remove('active');
-            loadTools();
-            updateStats();
-        } catch (error) { showAlert('Lỗi: ' + error.message, true); }
-    };
-
-    document.getElementById('confirmDepositBtn').onclick = async () => {
-        const uid = document.getElementById('depositUserId').value;
-        const amount = parseInt(document.getElementById('depositAmount').value);
-        const email = document.getElementById('depositUserEmail').value;
-        if (!amount || amount <= 0) { showAlert('Nhập số tiền hợp lệ!', true); return; }
-        try {
-            await db.runTransaction(async (t) => {
-                const userRef = db.collection('users').doc(uid);
-                const userDoc = await t.get(userRef);
-                t.update(userRef, { balance: (userDoc.data().balance || 0) + amount });
-                t.set(db.collection('transactions').doc(), { userId: uid, userEmail: email, amount: amount, type: 'deposit', status: 'success', createdAt: new Date() });
-            });
-            document.getElementById('depositModal').classList.remove('active');
-            await loadUsers();
-            await loadTransactions();
-            updateStats();
-            showAlert(`✅ Đã nạp ${formatPrice(amount)}đ`);
-        } catch (error) { showAlert('Lỗi: ' + error.message, true); }
-    };
-
-    document.querySelectorAll('.admin-nav-item').forEach(link => {
-        link.onclick = (e) => {
-            e.preventDefault();
-            const page = link.dataset.page;
-            document.querySelectorAll('.admin-nav-item').forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-            document.querySelectorAll('.admin-page').forEach(p => p.classList.remove('active'));
-            document.getElementById(page + 'Page').classList.add('active');
-            document.getElementById('pageTitle').innerText = link.innerText.trim();
-        };
-    });
-
-    document.getElementById('adminLogout').onclick = async () => { await auth.signOut(); window.location.href = 'index.html'; };
-    document.getElementById('closeModalBtn').onclick = () => document.getElementById('toolModal').classList.remove('active');
-    document.getElementById('closeDepositModalBtn').onclick = () => document.getElementById('depositModal').classList.remove('active');
-    window.onclick = (e) => {
-        if (e.target === document.getElementById('toolModal')) document.getElementById('toolModal').classList.remove('active');
-        if (e.target === document.getElementById('depositModal')) document.getElementById('depositModal').classList.remove('active');
-    };
-</script>
+<script src="js/admin-panel.js"></script>
 </body>
 </html>
